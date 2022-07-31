@@ -1,0 +1,12 @@
+eclipse.preferences.version=1
+encoding//APP/WinyunqLED.c=UTF-8
+encoding//APP/WinyunqMouse.c=UTF-8
+encoding//APP/hidmouse.c=UTF-8
+encoding//APP/include/WinyunqMouse.h=UTF-8
+encoding//Profile/WinyunqBattservice.c=UTF-8
+encoding//Profile/WinyunqConfigureMouse.c=UTF-8
+encoding//Profile/hiddev.c=UTF-8
+encoding//src/WinyunqLED.c=UTF-8
+encoding//src/WinyunqMouse.c=UTF-8
+encoding//src/hidmouse.c=UTF-8
+encoding//src/include/WinyunqMouse.h=UTF-8
