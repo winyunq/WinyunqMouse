@@ -136,10 +136,10 @@ void GoSleep()
   if (MouseConfigure.details.sleep)
   { //为0表示静止睡眠
   
-  GPIOB_ResetBits(LEDIndicator); //关掉LED
+  GPIOA_ResetBits(LEDIndicator); //关掉LED
     PFIC_DisableIRQ(GPIO_A_IRQn);
     
-    GPIOB_ResetBits(trackballpower);
+    GPIOA_ResetBits(trackballpower);
     
     PWR_PeriphWakeUpCfg(ENABLE, RB_SLP_GPIO_WAKE, Edge_ShortDelay);
     //SetSysClock( CLK_SOURCE_HSE_6_4MHz );
