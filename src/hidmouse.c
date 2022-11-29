@@ -18,9 +18,9 @@
 #include "hiddev.h"
 #include "hidmouse.h"
 #include "hidmouseservice.h"
-#include "WinyunqMouse.h"
 #include "WinyunqLED.h"
-
+#include "WinyunqMouse.h"
+#include "WinyunqConfigure.h"
 /*********************************************************************
  * MACROS
  */
@@ -97,7 +97,7 @@ static uint8 hidEmuTaskId=INVALID_TASK_ID;
 static uint8 scanRspData[] =
 {1+WinyunqMouseIDNameLength,                             // length of this data
  GAP_ADTYPE_LOCAL_NAME_COMPLETE,   // AD Type = Complete local name
- WinyunqMouseIDName,//指尖鼠标
+ WinyunqMouseIDName,
   0x05,   // length of this data
   GAP_ADTYPE_SLAVE_CONN_INTERVAL_RANGE,
   LO_UINT16( DEFAULT_DESIRED_MIN_CONN_INTERVAL ),   // 100ms

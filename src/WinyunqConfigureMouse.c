@@ -11,9 +11,10 @@
  * 
  * Copyright (c) 2022  Winyunq科技公司
  */
+#define __WinyunqConfigure_C
 #include "CONFIG.h"
-#include "ConfigureWinyunqMouse.h"
-#include "WinyunqMouse.h"
+#include "WinyunqConfigure.h"
+
 /// “配置”服务的UUID，为了使UUID有意义，在此采用字符串强转16字节数据
 const uint8 WinyunqMouseConfigureProfileServUUID[ATT_UUID_SIZE] =
 {

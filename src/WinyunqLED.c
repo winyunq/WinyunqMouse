@@ -1,4 +1,5 @@
 #include "WinyunqMouse.h"
+#include "WinyunqConfigure.h"
 #define LEDLock 0x80
 #define LightChange 0x40
 extern tmosTaskID PowerID;
