@@ -20,7 +20,7 @@ typedef unsigned long UINT32;
 #include "WinyunqConfigure.h"
 extern uint8 HidDev_Report(uint8 id, uint8 type, uint8 len, uint8 *pData); //上报函数
 
-uint32_t LastMoveUPDownTime,LastMoveLeftRightTime;
+uint32_t LastMoveUPDownTime,NowMoveUPDownTime,LastMoveLeftRightTime,NowMoveLeftRightTime;
 
 uint8 Sleep;
 
@@ -44,7 +44,7 @@ int32 upt, downt, ledtt, rightt;
  */
 void MouseInit()
 {
-  mousedata.data = 0;
+  MouseData.data = 0;
   EEPROM_READ(0, MouseConfigure.data, MouseConfigureSize); //读取保存的状态位
   if (MouseConfigure.data[MouseConfigureSize - 1] != 17)
   {
@@ -92,8 +92,8 @@ void MouseInit()
   InitLED();
 }
 /**
- * @brief           函数简介                                      
- *  @details        【不能简单描述则必选】如果不能一句话描述函数，请使用Details进行详细描述
+ * @brief           上下移动中断                                      
+ *  @details        上下移动的霍尔元件连接在GPIOA组上，当发生GPIOA组的中断时，若中断源来自MoveUP，则表示鼠标向上移动了，否则中断源来自MoveDown并且鼠标向下移动了
  * 
  * 
  * *//*
@@ -110,13 +110,15 @@ __attribute__((interrupt("WCH-Interrupt-fast")))
 __attribute__((section(".highcode")))
 void GPIOA_IRQHandler(void)
 {
-if(GPIOA_ReadITFlagBit(MoveUP))upt++;
-else downt++;
+  if(GPIOA_ReadITFlagBit(MoveUP))upt++;
+  else downt++;
+  LastMoveUPDownTime=NowMoveUPDownTime;
+    NowMoveUPDownTime=TMOS_GetSystemClock();
     GPIOA_ClearITFlagBit(  -1);
 }
 /**
- * @brief           函数简介                                      
- *  @details        【不能简单描述则必选】如果不能一句话描述函数，请使用Details进行详细描述
+ * @brief           左右移动中断                                      
+ *  @details        左右移动的霍尔元件连接在GPIOB组上，当发生GPIOB组的中断时，若中断源来自MoveLeft，则表示鼠标向左移动了，否则中断源来自MoveRight并且鼠标向右移动了
  * 
  * 
  * *//*
@@ -133,13 +135,15 @@ __attribute__((interrupt("WCH-Interrupt-fast")))
 __attribute__((section(".highcode")))
 void GPIOB_IRQHandler(void)
 {
-    if(GPIOB_ReadITFlagBit(MoveLeft))ledtt++;
+    if(GPIOB_ReadITFlagBit(MoveLeft)){ledtt++;}
     else rightt++;
+    LastMoveLeftRightTime=NowMoveLeftRightTime;
+    NowMoveLeftRightTime=TMOS_GetSystemClock();
   GPIOB_ClearITFlagBit(-1); //后期有可能将轨迹球的GPIO拆为两部分
 }
 /**
- * @brief           函数简介                                      
- *  @details        【不能简单描述则必选】如果不能一句话描述函数，请使用Details进行详细描述
+ * @brief           休眠                                      
+ *  @details        进入休眠状态，该过程将关闭LED，关闭霍尔电源，只保留轨迹球按键的终端唤醒。当按下轨迹球时，鼠标重启
  * 
  * 
  * *//*
@@ -170,10 +174,100 @@ void GoSleep()
     LowPower_Shutdown(0); //这里是直接掉电了,转动轨迹球重启唤醒
   }
 }
+/**
+ * @brief           获取按键状态                                      
+ *  @details        获取按键状态，并将其保存在MouseData中
+ * 
+ * 
+ * *//*
+ * 创建者:             Winyunq
+ * 创建日期:            2022-11-29
+ * 
+ *      《初始化》
+ * 修订内容:            创建函数
+ * @author          Winyunq进行完善
+ * @date            2022-11-29
+ * @version         1.0.0
+ */
 uint32 UsingSleepTime = 0;
 /**
- * @brief           函数简介                                      
- *  @details        【不能简单描述则必选】如果不能一句话描述函数，请使用Details进行详细描述
+ * @brief           获取按键状态                                      
+ *  @details        获取按键状态，并且保存到MouseData中
+ * 
+ * 
+ * *//*
+ * 创建者:             Winyunq
+ * 创建日期:            2022-11-29
+ * 
+ *      《初始化》
+ * 修订内容:            创建函数
+ * @author          Winyunq进行完善
+ * @date            2022-11-29
+ * @version         1.0.0
+ */
+void GetTouchSituation()
+{
+if (!GPIOB_ReadPortPin(LeftTouch))
+  {
+    if (MouseConfigure.details.right)
+    {
+      MouseData.details.situation.right = 1;
+    }
+  else
+    {
+      MouseData.details.situation.left = 1;
+    }
+  }
+}
+/**
+ * @brief           检测速度，上报移动量                                      
+ *  @details        与MoveByLocation()类似，但是修改移动逻辑为，当移动速度足够快（两次霍尔时间间距足够小）时，放大速度。而当移动速度足够慢时，则以1像素最低精度移动
+ * 
+ * 
+ * *//*
+ * 创建者:             Winyunq
+ * 创建日期:            2022-11-29
+ * 
+ *      《初始化》
+ * 修订内容:            创建函数
+ * @author          Winyunq进行完善
+ * @date            2022-11-29
+ * @version         1.0.0
+ */
+void MoveBySpeed(){
+  int32 SpeedTime,MoveSpeed;
+  
+  int x = 0, y = 0;
+  x = rightt - ledtt;
+  ledtt = rightt = 0;
+  y = downt - upt;
+  upt = downt = 0;
+  SpeedTime=NowMoveLeftRightTime-LastMoveLeftRightTime;
+  if(SpeedTime<WinyunqMouseMoveSpeedListTime)x *= MouseConfigure.details.speed;
+  SpeedTime=NowMoveUPDownTime-LastMoveUPDownTime;
+  if(SpeedTime<WinyunqMouseMoveSpeedListTime)y *= MouseConfigure.details.speed;
+  if (!MouseConfigure.details.help)
+  {
+    if (MouseConfigure.details.trackball)
+    {
+      MouseData.details.x = y;
+      MouseData.details.y = -x;
+    } //trackball下，以右手为例，方向逆时针旋转90°
+    else
+    {
+      MouseData.details.x = x;
+      MouseData.details.y = -y; //非trackball下Y轴反向
+    }
+    if (MouseData.details.x < 0)
+      MouseData.details.situation.fleft = 1;
+    if (MouseData.details.y < 0)
+      MouseData.details.situation.fdown = 1; // Y方向
+  }
+  MouseData.details.z = 0;              //计算需要上报的数据
+}
+/**
+ * @brief           检测位移，上报位移                                      
+ *  @details        检测在此期间各方向霍尔元件触发次数，从而确定在各方向的移动距离
  * 
  * 
  * *//*
@@ -197,42 +291,46 @@ void MoveByLocation(){
   {
     if (MouseConfigure.details.trackball)
     {
-      mousedata.details.x = y;
-      mousedata.details.y = -x;
+      MouseData.details.x = y;
+      MouseData.details.y = -x;
     } //trackball下，以右手为例，方向逆时针旋转90°
     else
     {
-      mousedata.details.x = x;
-      mousedata.details.y = -y; //非trackball下Y轴反向
+      MouseData.details.x = x;
+      MouseData.details.y = -y; //非trackball下Y轴反向
     }
-    if (mousedata.details.x < 0)
-      mousedata.details.situation.fleft = 1;
-    if (mousedata.details.y < 0)
-      mousedata.details.situation.fdown = 1; // Y方向
-    mousedata.details.x *= MouseConfigure.details.speed;
-    mousedata.details.y *= MouseConfigure.details.speed;
+    if (MouseData.details.x < 0)
+      MouseData.details.situation.fleft = 1;
+    if (MouseData.details.y < 0)
+      MouseData.details.situation.fdown = 1; // Y方向
+    MouseData.details.x *= MouseConfigure.details.speed;
+    MouseData.details.y *= MouseConfigure.details.speed;
   }
-  mousedata.details.z = 0;              //计算需要上报的数据
+  MouseData.details.z = 0;              //计算需要上报的数据
 }
+/**
+ * @brief           函数简介                                      
+ *  @details        【不能简单描述则必选】如果不能一句话描述函数，请使用Details进行详细描述
+ * 
+ * 
+ * *//*
+ * 创建者:             Winyunq
+ * 创建日期:            2022-11-29
+ * 
+ *      《初始化》
+ * 修订内容:            创建函数
+ * @author          Winyunq进行完善
+ * @date            2022-11-29
+ * @version         1.0.0
+ */
 void MouseEvent()
 {
-  if (MouseConfigure.details.right)
-  {
-    if (!GPIOB_ReadPortPin(LeftTouch))
-    {
-      mousedata.details.situation.right = 1;
-    }
-  }
-  else
-  {
-    if (!GPIOB_ReadPortPin(LeftTouch))
-    {
-      mousedata.details.situation.left = 1;
-    }
-  }
-  if ((mousedata.buffer[0] == LastClick) //确认按键是否有更新
-      && (mousedata.buffer[1] == 0)      //确认是否有x轴位移
-      && (mousedata.buffer[2] == 0))     //确认是否有y轴位移
+  GetTouchSituation();
+  if(MouseConfigure.details.MoveTypeBySpeed){MoveBySpeed();}
+  else {MoveByLocation();}
+  if ((MouseData.buffer[0] == LastClick) //确认按键是否有更新
+      && (MouseData.buffer[1] == 0)      //确认是否有x轴位移
+      && (MouseData.buffer[2] == 0))     //确认是否有y轴位移
   {
     UsingSleepTime++;                                                    //无操作时间计时
     if (UsingSleepTime * MouseConfigure.details.report > WinyunqMouseSleepTime) //长时间处于无操作状态，进入睡眠模式
@@ -242,11 +340,11 @@ void MouseEvent()
   }
   else
   {
-    HidDev_Report(0, 1, 4, mousedata.buffer); //上报数据
+    HidDev_Report(0, 1, 4, MouseData.buffer); //上报数据
     UsingSleepTime = 0;
   }
-  LastClick = mousedata.buffer[0]; //记录上次上报的按键
-  mousedata.data = 0;              //清空,X,Y,Z会在上次上报数据前必定被更新
+  LastClick = MouseData.buffer[0]; //记录上次上报的按键
+  MouseData.data = 0;              //清空,X,Y,Z会在上次上报数据前必定被更新
 
   return;
 }

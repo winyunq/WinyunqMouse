@@ -36,6 +36,6 @@ Extern union
   } details;
   uint8 buffer[4];
   int32 data; // 32位CPU一次性清空
-} mousedata; //上报数据表,4字节
+} MouseData; //上报数据表,4字节
 
 #endif

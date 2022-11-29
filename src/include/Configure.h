@@ -37,14 +37,17 @@
 //连接设备后sleep设定
 #define trackballpower  GPIO_Pin_4//鼠标移动所需霍尔元器件的供能GPIOB
 #define WinyunqMouseSleepTime  MouseConfigure.details.sleep*5*2000
+/// 移动模式下，当鼠标速度过快时，会进入高速移动模式，此参数用于设定高速阈值
+#define WinyunqMouseMoveSpeedListTime MouseConfigure.details.speed*5*20
 typedef char boolean;
 #define MouseConfigureSize 8
 //支持权限设定
-#define ConfigureSetting ( SupportLeftRightTouch|SupportTrackBall|SupportWorkAsHelp|SupportLED )
+#define ConfigureSetting ( SupportLeftRightTouch|SupportTrackBall|SupportWorkAsHelp|SupportLED|SUpportMoveTypeBySpeed )
 #define SupportLeftRightTouch 0x1
 #define SupportTrackBall 0x2
 #define SupportWorkAsHelp 0x4
 #define SupportLED 0x8
+#define SUpportMoveTypeBySpeed 0x10
 /// 关掉的时钟
 #define CloseClock RB_SLP_CLK_TMR0|RB_SLP_CLK_TMR1|RB_SLP_CLK_TMR2|RB_SLP_CLK_TMR3|RB_SLP_CLK_UART0|RB_SLP_CLK_UART1|RB_SLP_CLK_UART2|RB_SLP_CLK_UART3|RB_SLP_CLK_SPI0|\
 RB_SLP_CLK_PWMX|RB_SLP_CLK_USB|RB_SLP_USB_WAKE|RB_SLP_RTC_WAKE

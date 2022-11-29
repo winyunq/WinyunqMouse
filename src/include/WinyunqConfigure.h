@@ -39,9 +39,11 @@ Extern union
     boolean trackball : 1; //trackball
     boolean help : 1;
     boolean LEDOn : 1; // LED常开
+    boolean MoveTypeBySpeed : 1 ;
     uint8 speed;
     uint8 report;
     uint8 sleep;
+    uint8 SpeedMoveListTime;
   } details;
   uint8 data[MouseConfigureSize];
 } MouseConfigure;
