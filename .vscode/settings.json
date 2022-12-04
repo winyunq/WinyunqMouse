@@ -1,5 +1,6 @@
 {
     "files.associations": {
-        "winyunqmouse.h": "c"
+        "winyunqmouse.h": "c",
+        "winyunqconfigure.h": "c"
     }
 }

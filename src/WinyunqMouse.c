@@ -19,17 +19,23 @@ typedef unsigned long UINT32;
 #include "WinyunqMouse.h"
 #include "WinyunqConfigure.h"
 extern uint8 HidDev_Report(uint8 id, uint8 type, uint8 len, uint8 *pData); //上报函数
-
+/// 上次上，下，左，右的霍尔触发时间
 uint32_t LastMoveUPDownTime,NowMoveUPDownTime,LastMoveLeftRightTime,NowMoveLeftRightTime;
 
 uint8 Sleep;
-
+/// 上一次上报数据包时上报的按键状态
 uint8 LastClick;
-
-int32 upt, downt, ledtt, rightt;
+/// 上的霍尔触发次数
+int32 UPTime, 
+/// 下的霍尔触发次数
+      DownTime, 
+/// 左的霍尔触发次数
+      LeftTime, 
+/// 右的霍尔触发次数
+      RightTime;
 /**
- * @brief           函数简介                                      
- *  @details        【不能简单描述则必选】如果不能一句话描述函数，请使用Details进行详细描述
+ * @brief           鼠标系统初始化                                     
+ *  @details        包括配置文件的读取，鼠标传感器的初始化，LED指示灯初始化
  * 
  * 
  * *//*
@@ -82,7 +88,7 @@ void MouseInit()
       }
         //GPIOA_ITModeCfg(MoveGroup, GPIO_ITMode_RiseEdge);
         PFIC_EnableIRQ(GPIO_B_IRQn);
-  upt = downt = ledtt = rightt = 0;
+  UPTime = DownTime = LeftTime = RightTime = 0;
   
   GPIOA_ModeCfg(trackballpower, GPIO_ModeOut_PP_20mA);
   if (MouseConfigure.details.help) //help仅使用右键，不需要向霍尔供电
@@ -110,8 +116,8 @@ __attribute__((interrupt("WCH-Interrupt-fast")))
 __attribute__((section(".highcode")))
 void GPIOA_IRQHandler(void)
 {
-  if(GPIOA_ReadITFlagBit(MoveUP))upt++;
-  else downt++;
+  if(GPIOA_ReadITFlagBit(MoveUP))UPTime++;
+  else DownTime++;
   LastMoveUPDownTime=NowMoveUPDownTime;
     NowMoveUPDownTime=TMOS_GetSystemClock();
     GPIOA_ClearITFlagBit(  -1);
@@ -135,8 +141,8 @@ __attribute__((interrupt("WCH-Interrupt-fast")))
 __attribute__((section(".highcode")))
 void GPIOB_IRQHandler(void)
 {
-    if(GPIOB_ReadITFlagBit(MoveLeft)){ledtt++;}
-    else rightt++;
+    if(GPIOB_ReadITFlagBit(MoveLeft)){LeftTime++;}
+    else RightTime++;
     LastMoveLeftRightTime=NowMoveLeftRightTime;
     NowMoveLeftRightTime=TMOS_GetSystemClock();
   GPIOB_ClearITFlagBit(-1); //后期有可能将轨迹球的GPIO拆为两部分
@@ -238,10 +244,10 @@ void MoveBySpeed(){
   int32 SpeedTime,MoveSpeed;
   
   int x = 0, y = 0;
-  x = rightt - ledtt;
-  ledtt = rightt = 0;
-  y = downt - upt;
-  upt = downt = 0;
+  x = RightTime - LeftTime;
+  LeftTime = RightTime = 0;
+  y = DownTime - UPTime;
+  UPTime = DownTime = 0;
   SpeedTime=NowMoveLeftRightTime-LastMoveLeftRightTime;
   if(SpeedTime<WinyunqMouseMoveSpeedListTime)x *= MouseConfigure.details.speed;
   SpeedTime=NowMoveUPDownTime-LastMoveUPDownTime;
@@ -283,10 +289,10 @@ void MoveBySpeed(){
 void MoveByLocation(){
   
   int x = 0, y = 0;
-  x = rightt - ledtt;
-  ledtt = rightt = 0;
-  y = downt - upt;
-  upt = downt = 0;
+  x = RightTime - LeftTime;
+  LeftTime = RightTime = 0;
+  y = DownTime - UPTime;
+  UPTime = DownTime = 0;
   if (!MouseConfigure.details.help)
   {
     if (MouseConfigure.details.trackball)
@@ -309,8 +315,8 @@ void MoveByLocation(){
   MouseData.details.z = 0;              //计算需要上报的数据
 }
 /**
- * @brief           函数简介                                      
- *  @details        【不能简单描述则必选】如果不能一句话描述函数，请使用Details进行详细描述
+ * @brief           鼠标上报事件                                      
+ *  @details        鼠标上报事件，立刻获取按键状态，移动数据，并判断是否形成了有效数据包。若数据包无效则无视且休眠计数。若数据包有效则提交数据报且清空休眠时间
  * 
  * 
  * *//*

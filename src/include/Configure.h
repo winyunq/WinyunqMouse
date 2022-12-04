@@ -1,4 +1,6 @@
+/// 设备名称
 #define WinyunqMouseIDName -28, -70, -111, -27, -72, -99, -28, -71, -117, -26, -116, -121
+/// 设备名称长度
 #define WinyunqMouseIDNameLength 12
 //产品名称,格式 云指 版本代号 续航代号 尺寸代号 体积代号,如云指1A
 //指尖鼠标
@@ -34,8 +36,9 @@
   CH_EXTIN_12 = 12,   // ADC 外部模拟通道 12   GPIOA14
   CH_EXTIN_13,      // ADC 外部模拟通道 13     GPIOA9
 */
-//连接设备后sleep设定
-#define trackballpower  GPIO_Pin_4//鼠标移动所需霍尔元器件的供能GPIOB
+/// 鼠标移动所需霍尔元器件的供能GPIOB
+#define trackballpower  GPIO_Pin_4
+/// 设备无操作休眠时间设定
 #define WinyunqMouseSleepTime  MouseConfigure.details.sleep*5*2000
 /// 移动模式下，当鼠标速度过快时，会进入高速移动模式，此参数用于设定高速阈值
 #define WinyunqMouseMoveSpeedListTime MouseConfigure.details.speed*5*20
