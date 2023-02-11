@@ -37,13 +37,13 @@ Extern union
   {
     boolean right : 1;   //左右键交换
     boolean trackball : 1; //trackball
-    boolean help : 1;
+    boolean help : 1; //辅助按键模式
     boolean LEDOn : 1; // LED常开
-    boolean MoveTypeBySpeed : 1 ;
-    uint8 speed;
-    uint8 report;
-    uint8 sleep;
-    uint8 SpeedMoveListTime;
+    boolean MoveTypeBySpeed : 1 ; //以速度调整移速
+    uint8 speed; // 移动速度
+    uint8 report; // 数据回报率
+    uint8 sleep; // 休眠时间
+    uint8 SpeedMoveListTime; //以速度调整移速的速度阈值
   } details;
   uint8 data[MouseConfigureSize];
 } MouseConfigure;
