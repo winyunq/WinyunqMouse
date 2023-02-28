@@ -24,6 +24,8 @@
 #define LEDIndicator GPIO_Pin_9
 #define power GPIO_Pin_12
 #define PoweGPIOChannel CH_EXTIN_2
+#define UsingUSB 1
+#define UsingBLE 0
 /*CH57X
   CH_EXTIN_0 = 0,     // ADC 外部模拟通道 0    GPIOA4
   CH_EXTIN_1,       // ADC 外部模拟通道 1      GPIOA5

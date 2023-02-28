@@ -14,7 +14,7 @@
 #include "HAL.h"
 #include "hiddev.h"
 #include "hidmouse.h"
-
+#include "USBMouse.h"
 /*********************************************************************
  * GLOBAL TYPEDEFS
  */
@@ -36,7 +36,12 @@ void Main_Circulation()
 {
     while(1)
     {
+        #ifdef UsingBLE
         TMOS_SystemProcess();
+        #else
+        MouseEvent();
+        mDelaymS(300);
+        #endif
     }
 }
 
@@ -60,18 +65,22 @@ int main(void)
     GPIOA_ModeCfg(bTXD1, GPIO_ModeOut_PP_5mA);
     UART1_DefInit();
 #endif
-
+#ifdef UsingBLE
     CH57X_BLEInit();
     HAL_Init();
     GAPRole_PeripheralInit();
     HidDev_Init();
     HidEmu_Init();
     PWR_PeriphClkCfg(DISABLE,CloseClock);
-      HSECFG_Current( HSE_RCur_75 );
+    HSECFG_Current( HSE_RCur_75 );
     #if(defined(DCDC_ENABLE)) && (DCDC_ENABLE == TRUE)
     PWR_DCDCCfg(ENABLE);
+    #endif
 #endif
-     MouseInit();
+#ifdef UsingUSB
+    USBModeInit();
+#endif
+    MouseInit();
     Main_Circulation();
 }
 

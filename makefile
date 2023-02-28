@@ -1,7 +1,7 @@
 #	生成hex文件目标 TARGET.hex
 TARGET = Winyunq
 #	riscv编译链路径
-ToolPath = 
+ToolPath = 'C:\MounRiver\MounRiver_Studio\toolchain\RISC-V Embedded GCC\bin\'
 #临时文件路径
 BUILD_DIR = bin
 #	C源文件，添加格式:
@@ -40,7 +40,7 @@ SZ = $(PREFIX)size
 LD = $(PREFIX)LD
 HEX = $(PREFIX)objcopy -O ihex 
 
-ConfigureFlag = -DDEBUG=1 -DCLK_OSC32K=2
+ConfigureFlag = -DDEBUG=0 -DCLK_OSC32K=2 -DDCDC_ENABLE=0 -DHAL_SlEEP=1 -DBLE_TX_POWER=0x25
 
 CFLAGS = -march=rv32imac -mabi=ilp32 -mcmodel=medany -msmall-data-limit=8 -mno-save-restore -Os -fmessage-length=0 -fsigned-char -ffunction-sections -fdata-sections -fno-common $(ConfigureFlag) -g -Wall $(C_INCLUDES)
 ASFLAGS = -march=rv32imac -mabi=ilp32 -mcmodel=medany -msmall-data-limit=8 -mno-save-restore -Os -fmessage-length=0 -fsigned-char -ffunction-sections -fdata-sections -fno-common  -g -x assembler

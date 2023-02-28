@@ -18,6 +18,7 @@ typedef unsigned long UINT32;
 
 #include "WinyunqMouse.h"
 #include "WinyunqConfigure.h"
+#include "USBMouse.h"
 extern uint8 HidDev_Report(uint8 id, uint8 type, uint8 len, uint8 *pData); // 上报函数
 /// 上次上，下，左，右的霍尔触发时间
 uint32_t LastMoveUPDownTime, NowMoveUPDownTime, LastMoveLeftRightTime, NowMoveLeftRightTime;
@@ -465,7 +466,12 @@ void MouseEvent()
   }
   else
   {
+    #ifdef UsingBLE
     HidDev_Report(0, 1, 4, MouseData.buffer); // 上报数据
+    #endif
+    #ifdef UsingUSB
+    DevHIDReport(MouseData.buffer,4);
+    #endif
     UsingSleepTime = 0;
   }
   LastClick = MouseData.buffer[0]; // 记录上次上报的按键
