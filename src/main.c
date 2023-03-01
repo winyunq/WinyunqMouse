@@ -24,13 +24,6 @@ __attribute__((aligned(4))) uint32_t MEM_BUF[BLE_MEMHEAP_SIZE / 4];
 const uint8_t MacAddr[6] = {0x84, 0xC2, 0xE4, 0x03, 0x02, 0x02};
 #endif
 
-#ifdef UsingUSB
-int main(void)
-{
-    mains();
-}
-#else
-
 /*********************************************************************
  * @fn      Main_Circulation
  *
@@ -47,7 +40,7 @@ void Main_Circulation()
         TMOS_SystemProcess();
         #else
         MouseEvent();
-        mDelaymS(300);
+        mDelaymS(10);
         #endif
     }
 }
@@ -62,7 +55,7 @@ void Main_Circulation()
 int main(void)
 {
 
-    SetSysClock(CLK_SOURCE_PLL_60MHz);
+    SetSysClock(CLK_SOURCE_PLL_32MHz);
 #if(defined(HAL_SLEEP)) && (HAL_SLEEP == TRUE)
     GPIOA_ModeCfg(GPIO_Pin_All, GPIO_ModeIN_PD);
     GPIOB_ModeCfg(GPIO_Pin_All, GPIO_ModeIN_PD);
@@ -92,4 +85,3 @@ int main(void)
 }
 
 /******************************** endfile @ main ******************************/
-#endif
