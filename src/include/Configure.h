@@ -24,8 +24,10 @@
 #define LEDIndicator GPIO_Pin_9
 #define power GPIO_Pin_12
 #define PoweGPIOChannel CH_EXTIN_2
+/// 是否开启USB功能。为了让用户体验产品，而不是去适应产品，默认情况下不应该开启此功能。
 #define UsingUSB 1
-// #define UsingBLE 1
+/// 是否开启蓝牙功能。此选型是针对设计有失误，霍尔被蓝牙干扰的情况下迫不得已设计的。
+//#define UsingBLE 1
 /*CH57X
   CH_EXTIN_0 = 0,     // ADC 外部模拟通道 0    GPIOA4
   CH_EXTIN_1,       // ADC 外部模拟通道 1      GPIOA5

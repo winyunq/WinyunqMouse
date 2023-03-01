@@ -1,7 +1,7 @@
 /**
  * @file            文件名:                USBMouse.c
  * @brief           USB模式                                      
- *  @details        使得蓝牙设备支持USB连接
+ *  @details        引入该文件，使得蓝牙设备支持USB连接。通过调用USBModeInit()完成蓝牙USB注册。通过调用DevHIDReport()从USB方向发送数据。
  * 
  * @author          Winyunq             创建
  * @version         版本:                 1.0.0
@@ -13,17 +13,16 @@
 #include "CH57x_common.h"
 
 #define DevEP0SIZE 0x40
-/*HID类报表描述符*/
+/// HID类报表描述符，此处为USB鼠标数据报表
 const UINT8 MouseRepDesc[] = {0x05, 0x01, 0x09, 0x02, 0xA1, 0x01, 0x09, 0x01, 0xA1, 0x00, 0x05, 0x09, 0x19, 0x01, 0x29,
                               0x03, 0x15, 0x00, 0x25, 0x01, 0x75, 0x01, 0x95, 0x03, 0x81, 0x02, 0x75, 0x05, 0x95, 0x01,
                               0x81, 0x01, 0x05, 0x01, 0x09, 0x30, 0x09, 0x31, 0x09, 0x38, 0x15, 0x81, 0x25, 0x7f, 0x75,
                               0x08, 0x95, 0x03, 0x81, 0x06, 0xC0, 0xC0};
-// 设备描述符
-const UINT8 MyDevDescr[] = {0x12, 0x01, 0x10, 0x01, 0x00, 0x00, 0x00, DevEP0SIZE, 0x3d, 0x41, 0x07, 0x21, 0x00, 0x00,
+/// 设备描述符
+const UINT8 DevicesDescriptors[] = {0x12, 0x01, 0x10, 0x01, 0x00, 0x00, 0x00, DevEP0SIZE, 0x3d, 0x41, 0x07, 0x21, 0x00, 0x00,
                             0x00, 0x00, 0x00, 0x01};
-// 配置描述符
-
-const UINT8 MyCfgDescr[] = {
+/// 配置描述符,USB鼠标
+const UINT8 ConfigureDescriptors[] = {
     0x09, 0x02, 0x3b, 0x00, 0x01, 0x01, 0x00, 0xA0, 0x32,                        // 配置描述符
     0x09, 0x04, 0x00, 0x00, 0x01, 0x03, 0x01, 0x02, 0x00,                        // 接口描述符,鼠标
     0x09, 0x21, 0x10, 0x01, 0x00, 0x01, 0x22, (UINT8)sizeof(MouseRepDesc), 0x00, // HID类描述符
@@ -33,10 +32,10 @@ const UINT8 MyCfgDescr[] = {
 
 // 语言描述符
 const UINT8 MyLangDescr[] = {0x04, 0x03, 0x09, 0x04};
-// 厂家信息
+/// 厂家信息 Winyunq
 const UINT8 MyManuInfo[] = {16, 03, 'W', 0, 'i', 0, 'n', 0, 'y', 0, 'u', 0, 'n', 0, 'q', 0};
-// 产品信息
-const UINT8 MyProdInfo[] = {42, 03, 'W', 0, 'i', 0, 'n', 0, 'y', 0, 'u', 0, 'n', 0, 'q', 0, ' ', 0, 'U', 0, 'S', 0, 'B', 0, '2', 0, '.', 0, '0', 0, ' ', 0, 'M', 0, 'o', 0, 'u', 0, 's', 0, 'e', 0};
+/// 产品信息:Winyunq USB2.0 Mouse
+const UINT8 ProduceInformation[] = {42, 03, 'W', 0, 'i', 0, 'n', 0, 'y', 0, 'u', 0, 'n', 0, 'q', 0, ' ', 0, 'U', 0, 'S', 0, 'B', 0, '2', 0, '.', 0, '0', 0, ' ', 0, 'M', 0, 'o', 0, 'u', 0, 's', 0, 'e', 0};
 
 
 
@@ -57,12 +56,22 @@ const uint8_t *pDescr;
 uint8_t Report_Value = 0x00;
 uint8_t Idle_Value = 0x00;
 uint8_t USB_SleepStatus = 0x00; /* USB睡眠状态 */
-
-// HID设备中断传输中上传给主机4字节的数据
-uint8_t HID_Buf[] = {0, 0, 0, 0};
-/*
-*/
-void USB_DevTransProcess( void )
+/**
+ * @brief           USB数据处理                                      
+ *  @details        USB数据处理函数，无需过多关注。如果要实现复合设备，比如说键盘鼠标复合，可以关注USB_DESCR_TYP_REPORT选项。
+ * 
+ * 
+ * *//*
+ * 创建者:             Winyunq
+ * 创建日期:            2023-03-01
+ * 
+ *      《初始化》
+ * 修订内容:            创建函数
+ * @author          Winyunq进行完善
+ * @date            2023-03-01
+ * @version         1.0.0
+ */
+__attribute__((always_inline)) inline void USB_DevTransProcess( void )
 {
   UINT8 len, chtype;
   UINT8 intflag, errflag = 0;
@@ -207,15 +216,15 @@ void USB_DevTransProcess( void )
             {
               case USB_DESCR_TYP_DEVICE :
               {
-                pDescr = MyDevDescr;
-                len = MyDevDescr[0];
+                pDescr = DevicesDescriptors;
+                len = DevicesDescriptors[0];
               }
                 break;
 
               case USB_DESCR_TYP_CONFIG :
               {
-                pDescr = MyCfgDescr;
-                len = MyCfgDescr[2];
+                pDescr = ConfigureDescriptors;
+                len = ConfigureDescriptors[2];
               }
                 break;
 
@@ -246,8 +255,8 @@ void USB_DevTransProcess( void )
                     len = MyManuInfo[0];
                     break;
                   case 2 :
-                    pDescr = MyProdInfo;
-                    len = MyProdInfo[0];
+                    pDescr = ProduceInformation;
+                    len = ProduceInformation[0];
                     break;
                   case 0 :
                     pDescr = MyLangDescr;

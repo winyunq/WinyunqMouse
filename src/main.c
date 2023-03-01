@@ -55,7 +55,7 @@ void Main_Circulation()
 int main(void)
 {
 
-    SetSysClock(CLK_SOURCE_PLL_32MHz);
+    SetSysClock(CLK_SOURCE_PLL_60MHz);
 #if(defined(HAL_SLEEP)) && (HAL_SLEEP == TRUE)
     GPIOA_ModeCfg(GPIO_Pin_All, GPIO_ModeIN_PD);
     GPIOB_ModeCfg(GPIO_Pin_All, GPIO_ModeIN_PD);
@@ -71,7 +71,7 @@ int main(void)
     GAPRole_PeripheralInit();
     HidDev_Init();
     HidEmu_Init();
-    PWR_PeriphClkCfg(DISABLE,CloseClock);
+    //PWR_PeriphClkCfg(DISABLE,CloseClock);
     HSECFG_Current( HSE_RCur_75 );
     #if(defined(DCDC_ENABLE)) && (DCDC_ENABLE == TRUE)
     PWR_DCDCCfg(ENABLE);

@@ -452,8 +452,11 @@ void MouseEvent()
   {
     MoveByLocation();
   }*/
+  #ifdef UsingUSB
+  MoveByLocation();
+  #else
   MoveBySpeedDelay();
-
+  #endif
   if ((MouseData.buffer[0] == LastClick) // 确认按键是否有更新
       && (MouseData.buffer[1] == 0)      // 确认是否有x轴位移
       && (MouseData.buffer[2] == 0))     // 确认是否有y轴位移
