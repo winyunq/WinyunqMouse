@@ -14,7 +14,7 @@
 #include "HAL.h"
 #include "hiddev.h"
 #include "hidmouse.h"
-#include "USBMouse.h"
+//#include "USBMouse.h"
 /*********************************************************************
  * GLOBAL TYPEDEFS
  */
@@ -23,6 +23,13 @@ __attribute__((aligned(4))) uint32_t MEM_BUF[BLE_MEMHEAP_SIZE / 4];
 #if(defined(BLE_MAC)) && (BLE_MAC == TRUE)
 const uint8_t MacAddr[6] = {0x84, 0xC2, 0xE4, 0x03, 0x02, 0x02};
 #endif
+
+#ifdef UsingUSB
+int main(void)
+{
+    mains();
+}
+#else
 
 /*********************************************************************
  * @fn      Main_Circulation
@@ -85,3 +92,4 @@ int main(void)
 }
 
 /******************************** endfile @ main ******************************/
+#endif

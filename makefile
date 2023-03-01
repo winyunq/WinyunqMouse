@@ -6,7 +6,7 @@ ToolPath = 'C:\MounRiver\MounRiver_Studio\toolchain\RISC-V Embedded GCC\bin\'
 BUILD_DIR = bin
 #	C源文件，添加格式:
 #	C_SOURCES += $(wildcard <C文件路径>/*.c )
-C_SOURCES += $(wildcard src/*.c )
+C_SOURCES += $(wildcard src/*.c ) 
 C_SOURCES += $(wildcard libs/HAL/*.c )
 C_SOURCES += $(wildcard libs/Profile/*.c )
 C_SOURCES += $(wildcard libs/StdPeriphDriver/*.c )

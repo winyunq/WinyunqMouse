@@ -17,25 +17,25 @@ extern "C" {
 
 #if DISK_LIB_ENABLE
   #if DISK_WITHOUT_USB_HUB
-        /***************************************** ²»Ê¹ÓÃUÅÌÎÄ¼þÏµÍ³¿â»òÕßUÅÌ¹ÒÔØUSBhubÏÂÃæ£¬ÐèÒª¹Ø±ÕÏÂÃæ¶¨Òå */
+        /***************************************** ï¿½ï¿½Ê¹ï¿½ï¿½Uï¿½ï¿½ï¿½Ä¼ï¿½ÏµÍ³ï¿½ï¿½ï¿½ï¿½ï¿½Uï¿½Ì¹ï¿½ï¿½ï¿½USBhubï¿½ï¿½ï¿½æ£¬ï¿½ï¿½Òªï¿½Ø±ï¿½ï¿½ï¿½ï¿½æ¶¨ï¿½ï¿½ */
     #define FOR_ROOT_UDISK_ONLY
   #endif
-    /***************************************** Ê¹ÓÃUÅÌÎÄ¼þÏµÍ³¿â£¬ÐèÒª¿ªÆôÏÂÃæ¶¨Òå, ²»Ê¹ÓÃÇë¹Ø±Õ */
-  #define DISK_BASE_BUF_LEN    512  /* Ä¬ÈÏµÄ´ÅÅÌÊý¾Ý»º³åÇø´óÐ¡Îª512×Ö½Ú,½¨ÒéÑ¡ÔñÎª2048ÉõÖÁ4096ÒÔÖ§³ÖÄ³Ð©´óÉÈÇøµÄUÅÌ,Îª0Ôò½ûÖ¹ÔÚ.HÎÄ¼þÖÐ¶¨Òå»º³åÇø²¢ÓÉÓ¦ÓÃ³ÌÐòÔÚpDISK_BASE_BUFÖÐÖ¸¶¨ */
+    /***************************************** Ê¹ï¿½ï¿½Uï¿½ï¿½ï¿½Ä¼ï¿½ÏµÍ³ï¿½â£¬ï¿½ï¿½Òªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½æ¶¨ï¿½ï¿½, ï¿½ï¿½Ê¹ï¿½ï¿½ï¿½ï¿½Ø±ï¿½ */
+  #define DISK_BASE_BUF_LEN    512  /* Ä¬ï¿½ÏµÄ´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ý»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð¡Îª512ï¿½Ö½ï¿½,ï¿½ï¿½ï¿½ï¿½Ñ¡ï¿½ï¿½Îª2048ï¿½ï¿½ï¿½ï¿½4096ï¿½ï¿½Ö§ï¿½ï¿½Ä³Ð©ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Uï¿½ï¿½,Îª0ï¿½ï¿½ï¿½Ö¹ï¿½ï¿½.Hï¿½Ä¼ï¿½ï¿½Ð¶ï¿½ï¿½å»ºï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ó¦ï¿½Ã³ï¿½ï¿½ï¿½ï¿½ï¿½pDISK_BASE_BUFï¿½ï¿½Ö¸ï¿½ï¿½ */
 #endif
 
-// ¸÷×Ó³ÌÐò·µ»Ø×´Ì¬Âë
-#define ERR_SUCCESS            0x00  // ²Ù×÷³É¹¦
-#define ERR_USB_CONNECT        0x15  /* ¼ì²âµ½USBÉè±¸Á¬½ÓÊÂ¼þ,ÒÑ¾­Á¬½Ó */
-#define ERR_USB_DISCON         0x16  /* ¼ì²âµ½USBÉè±¸¶Ï¿ªÊÂ¼þ,ÒÑ¾­¶Ï¿ª */
-#define ERR_USB_BUF_OVER       0x17  /* USB´«ÊäµÄÊý¾ÝÓÐÎó»òÕßÊý¾ÝÌ«¶à»º³åÇøÒç³ö */
-#define ERR_USB_DISK_ERR       0x1F  /* USB´æ´¢Æ÷²Ù×÷Ê§°Ü,ÔÚ³õÊ¼»¯Ê±¿ÉÄÜÊÇUSB´æ´¢Æ÷²»Ö§³Ö,ÔÚ¶ÁÐ´²Ù×÷ÖÐ¿ÉÄÜÊÇ´ÅÅÌËð»µ»òÕßÒÑ¾­¶Ï¿ª */
-#define ERR_USB_TRANSFER       0x20  /* NAK/STALLµÈ¸ü¶à´íÎóÂëÔÚ0x20~0x2F */
-#define ERR_USB_UNSUPPORT      0xFB  /*²»Ö§³ÖµÄUSBÉè±¸*/
-#define ERR_USB_UNKNOWN        0xFE  /*Éè±¸²Ù×÷³ö´í*/
-#define ERR_AOA_PROTOCOL       0x41  /*Ð­Òé°æ±¾³ö´í */
+// ï¿½ï¿½ï¿½Ó³ï¿½ï¿½ò·µ»ï¿½×´Ì¬ï¿½ï¿½
+#define ERR_SUCCESS            0x00  // ï¿½ï¿½ï¿½ï¿½ï¿½É¹ï¿½
+#define ERR_USB_CONNECT        0x15  /* ï¿½ï¿½âµ½USBï¿½è±¸ï¿½ï¿½ï¿½ï¿½ï¿½Â¼ï¿½,ï¿½Ñ¾ï¿½ï¿½ï¿½ï¿½ï¿½ */
+#define ERR_USB_DISCON         0x16  /* ï¿½ï¿½âµ½USBï¿½è±¸ï¿½Ï¿ï¿½ï¿½Â¼ï¿½,ï¿½Ñ¾ï¿½ï¿½Ï¿ï¿½ */
+#define ERR_USB_BUF_OVER       0x17  /* USBï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ì«ï¿½à»ºï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ */
+#define ERR_USB_DISK_ERR       0x1F  /* USBï¿½æ´¢ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê§ï¿½ï¿½,ï¿½Ú³ï¿½Ê¼ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½USBï¿½æ´¢ï¿½ï¿½ï¿½ï¿½Ö§ï¿½ï¿½,ï¿½Ú¶ï¿½Ð´ï¿½ï¿½ï¿½ï¿½ï¿½Ð¿ï¿½ï¿½ï¿½ï¿½Ç´ï¿½ï¿½ï¿½ï¿½ð»µ»ï¿½ï¿½ï¿½ï¿½Ñ¾ï¿½ï¿½Ï¿ï¿½ */
+#define ERR_USB_TRANSFER       0x20  /* NAK/STALLï¿½È¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½0x20~0x2F */
+#define ERR_USB_UNSUPPORT      0xFB  /*ï¿½ï¿½Ö§ï¿½Öµï¿½USBï¿½è±¸*/
+#define ERR_USB_UNKNOWN        0xFE  /*ï¿½è±¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½*/
+#define ERR_AOA_PROTOCOL       0x41  /*Ð­ï¿½ï¿½æ±¾ï¿½ï¿½ï¿½ï¿½ */
 
-/*USBÉè±¸Ïà¹ØÐÅÏ¢±í,×î¶àÖ§³Ö1¸öÉè±¸*/
+/*USBï¿½è±¸ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢ï¿½ï¿½,ï¿½ï¿½ï¿½Ö§ï¿½ï¿½1ï¿½ï¿½ï¿½è±¸*/
 #define ROOT_DEV_DISCONNECT    0
 #define ROOT_DEV_CONNECTED     1
 #define ROOT_DEV_FAILED        2
@@ -46,40 +46,40 @@ extern "C" {
 #define DEV_TYPE_UNKNOW        0xFF
 
 /*
-Ô¼¶¨: USBÉè±¸µØÖ··ÖÅä¹æÔò(²Î¿¼USB_DEVICE_ADDR)
-µØÖ·Öµ  Éè±¸Î»ÖÃ
-0x02    ÄÚÖÃRoot-HUBÏÂµÄUSBÉè±¸»òÍâ²¿HUB
-0x1x    ÄÚÖÃRoot-HUBÏÂµÄÍâ²¿HUBµÄ¶Ë¿ÚxÏÂµÄUSBÉè±¸,xÎª1~n
+Ô¼ï¿½ï¿½: USBï¿½è±¸ï¿½ï¿½Ö·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½(ï¿½Î¿ï¿½USB_DEVICE_ADDR)
+ï¿½ï¿½Ö·Öµ  ï¿½è±¸Î»ï¿½ï¿½
+0x02    ï¿½ï¿½ï¿½ï¿½Root-HUBï¿½Âµï¿½USBï¿½è±¸ï¿½ï¿½ï¿½â²¿HUB
+0x1x    ï¿½ï¿½ï¿½ï¿½Root-HUBï¿½Âµï¿½ï¿½â²¿HUBï¿½Ä¶Ë¿ï¿½xï¿½Âµï¿½USBï¿½è±¸,xÎª1~n
 */
 #define HUB_MAX_PORTS          4
-#define WAIT_USB_TOUT_200US    800   // µÈ´ýUSBÖÐ¶Ï³¬Ê±Ê±¼ä
+#define WAIT_USB_TOUT_200US    800   // ï¿½È´ï¿½USBï¿½Ð¶Ï³ï¿½Ê±Ê±ï¿½ï¿½
 
 typedef struct
 {
-    uint8_t  DeviceStatus;  // Éè±¸×´Ì¬,0-ÎÞÉè±¸,1-ÓÐÉè±¸µ«ÉÐÎ´³õÊ¼»¯,2-ÓÐÉè±¸µ«³õÊ¼»¯Ã¶¾ÙÊ§°Ü,3-ÓÐÉè±¸ÇÒ³õÊ¼»¯Ã¶¾Ù³É¹¦
-    uint8_t  DeviceAddress; // Éè±¸±»·ÖÅäµÄUSBµØÖ·
-    uint8_t  DeviceSpeed;   // 0ÎªµÍËÙ,·Ç0ÎªÈ«ËÙ
-    uint8_t  DeviceType;    // Éè±¸ÀàÐÍ
+    uint8_t  DeviceStatus;  // ï¿½è±¸×´Ì¬,0-ï¿½ï¿½ï¿½è±¸,1-ï¿½ï¿½ï¿½è±¸ï¿½ï¿½ï¿½ï¿½Î´ï¿½ï¿½Ê¼ï¿½ï¿½,2-ï¿½ï¿½ï¿½è±¸ï¿½ï¿½ï¿½ï¿½Ê¼ï¿½ï¿½Ã¶ï¿½ï¿½Ê§ï¿½ï¿½,3-ï¿½ï¿½ï¿½è±¸ï¿½Ò³ï¿½Ê¼ï¿½ï¿½Ã¶ï¿½Ù³É¹ï¿½
+    uint8_t  DeviceAddress; // ï¿½è±¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½USBï¿½ï¿½Ö·
+    uint8_t  DeviceSpeed;   // 0Îªï¿½ï¿½ï¿½ï¿½,ï¿½ï¿½0ÎªÈ«ï¿½ï¿½
+    uint8_t  DeviceType;    // ï¿½è±¸ï¿½ï¿½ï¿½ï¿½
     uint16_t DeviceVID;
     uint16_t DevicePID;
-    uint8_t  GpVar[4];     // Í¨ÓÃ±äÁ¿£¬´æ·Å¶Ëµã
-    uint8_t  GpHUBPortNum; // Í¨ÓÃ±äÁ¿,Èç¹ûÊÇHUB£¬±íÊ¾HUB¶Ë¿ÚÊý
+    uint8_t  GpVar[4];     // Í¨ï¿½Ã±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Å¶Ëµï¿½
+    uint8_t  GpHUBPortNum; // Í¨ï¿½Ã±ï¿½ï¿½ï¿½,ï¿½ï¿½ï¿½ï¿½ï¿½HUBï¿½ï¿½ï¿½ï¿½Ê¾HUBï¿½Ë¿ï¿½ï¿½ï¿½
 } _RootHubDev;
 
 typedef struct
 {
-    UINT8  DeviceStatus;  // Éè±¸×´Ì¬,0-ÎÞÉè±¸,1-ÓÐÉè±¸µ«ÉÐÎ´³õÊ¼»¯,2-ÓÐÉè±¸µ«³õÊ¼»¯Ã¶¾ÙÊ§°Ü,3-ÓÐÉè±¸ÇÒ³õÊ¼»¯Ã¶¾Ù³É¹¦
-    UINT8  DeviceAddress; // Éè±¸±»·ÖÅäµÄUSBµØÖ·
-    UINT8  DeviceSpeed;   // 0ÎªµÍËÙ,·Ç0ÎªÈ«ËÙ
-    UINT8  DeviceType;    // Éè±¸ÀàÐÍ
+    UINT8  DeviceStatus;  // ï¿½è±¸×´Ì¬,0-ï¿½ï¿½ï¿½è±¸,1-ï¿½ï¿½ï¿½è±¸ï¿½ï¿½ï¿½ï¿½Î´ï¿½ï¿½Ê¼ï¿½ï¿½,2-ï¿½ï¿½ï¿½è±¸ï¿½ï¿½ï¿½ï¿½Ê¼ï¿½ï¿½Ã¶ï¿½ï¿½Ê§ï¿½ï¿½,3-ï¿½ï¿½ï¿½è±¸ï¿½Ò³ï¿½Ê¼ï¿½ï¿½Ã¶ï¿½Ù³É¹ï¿½
+    UINT8  DeviceAddress; // ï¿½è±¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½USBï¿½ï¿½Ö·
+    UINT8  DeviceSpeed;   // 0Îªï¿½ï¿½ï¿½ï¿½,ï¿½ï¿½0ÎªÈ«ï¿½ï¿½
+    UINT8  DeviceType;    // ï¿½è±¸ï¿½ï¿½ï¿½ï¿½
     UINT16 DeviceVID;
     UINT16 DevicePID;
-    UINT8  GpVar[4]; // Í¨ÓÃ±äÁ¿
-} _DevOnHubPort;     // ¼Ù¶¨:²»³¬¹ý1¸öÍâ²¿HUB,Ã¿¸öÍâ²¿HUB²»³¬¹ýHUB_MAX_PORTS¸ö¶Ë¿Ú(¶àÁË²»¹Ü)
+    UINT8  GpVar[4]; // Í¨ï¿½Ã±ï¿½ï¿½ï¿½
+} _DevOnHubPort;     // ï¿½Ù¶ï¿½:ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½1ï¿½ï¿½ï¿½â²¿HUB,Ã¿ï¿½ï¿½ï¿½â²¿HUBï¿½ï¿½ï¿½ï¿½ï¿½ï¿½HUB_MAX_PORTSï¿½ï¿½ï¿½Ë¿ï¿½(ï¿½ï¿½ï¿½Ë²ï¿½ï¿½ï¿½)
 
 extern _RootHubDev   ThisUsbDev;
-extern _DevOnHubPort DevOnHubPort[HUB_MAX_PORTS]; // ¼Ù¶¨:²»³¬¹ý1¸öÍâ²¿HUB,Ã¿¸öÍâ²¿HUB²»³¬¹ýHUB_MAX_PORTS¸ö¶Ë¿Ú(¶àÁË²»¹Ü)
-extern uint8_t       UsbDevEndp0Size;             // USBÉè±¸µÄ¶Ëµã0µÄ×î´ó°ü³ß´ç */
+extern _DevOnHubPort DevOnHubPort[HUB_MAX_PORTS]; // ï¿½Ù¶ï¿½:ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½1ï¿½ï¿½ï¿½â²¿HUB,Ã¿ï¿½ï¿½ï¿½â²¿HUBï¿½ï¿½ï¿½ï¿½ï¿½ï¿½HUB_MAX_PORTSï¿½ï¿½ï¿½Ë¿ï¿½(ï¿½ï¿½ï¿½Ë²ï¿½ï¿½ï¿½)
+extern uint8_t       UsbDevEndp0Size;             // USBï¿½è±¸ï¿½Ä¶Ëµï¿½0ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ß´ï¿½ */
 extern uint8_t       FoundNewDev;
 
 extern uint8_t *pHOST_RX_RAM_Addr;
@@ -87,201 +87,201 @@ extern uint8_t *pHOST_TX_RAM_Addr;
 #define pSetupReq    ((PUSB_SETUP_REQ)pHOST_TX_RAM_Addr)
 extern uint8_t Com_Buffer[];
 
-/* ÒÔÏÂÎªUSBÖ÷»úÇëÇó°ü */
-extern const uint8_t SetupGetDevDescr[];     // »ñÈ¡Éè±¸ÃèÊö·û*/
-extern const uint8_t SetupGetCfgDescr[];     // »ñÈ¡ÅäÖÃÃèÊö·û*/
-extern const uint8_t SetupSetUsbAddr[];      // ÉèÖÃUSBµØÖ·*/
-extern const uint8_t SetupSetUsbConfig[];    // ÉèÖÃUSBÅäÖÃ*/
-extern const uint8_t SetupSetUsbInterface[]; // ÉèÖÃUSB½Ó¿ÚÅäÖÃ*/
-extern const uint8_t SetupClrEndpStall[];    // Çå³ý¶ËµãSTALL*/
+/* ï¿½ï¿½ï¿½ï¿½ÎªUSBï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ */
+extern const uint8_t SetupGetDevDescr[];     // ï¿½ï¿½È¡ï¿½è±¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½*/
+extern const uint8_t SetupGetCfgDescr[];     // ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½*/
+extern const uint8_t SetupSetUsbAddr[];      // ï¿½ï¿½ï¿½ï¿½USBï¿½ï¿½Ö·*/
+extern const uint8_t SetupSetUsbConfig[];    // ï¿½ï¿½ï¿½ï¿½USBï¿½ï¿½ï¿½ï¿½*/
+extern const uint8_t SetupSetUsbInterface[]; // ï¿½ï¿½ï¿½ï¿½USBï¿½Ó¿ï¿½ï¿½ï¿½ï¿½ï¿½*/
+extern const uint8_t SetupClrEndpStall[];    // ï¿½ï¿½ï¿½ï¿½Ëµï¿½STALL*/
 
 /**
- * @brief   ¹Ø±ÕROOT-HUB¶Ë¿Ú,Êµ¼ÊÉÏÓ²¼þÒÑ¾­×Ô¶¯¹Ø±Õ,´Ë´¦Ö»ÊÇÇå³ýÒ»Ð©½á¹¹×´Ì¬
+ * @brief   ï¿½Ø±ï¿½ROOT-HUBï¿½Ë¿ï¿½,Êµï¿½ï¿½ï¿½ï¿½Ó²ï¿½ï¿½ï¿½Ñ¾ï¿½ï¿½Ô¶ï¿½ï¿½Ø±ï¿½,ï¿½Ë´ï¿½Ö»ï¿½ï¿½ï¿½ï¿½ï¿½Ò»Ð©ï¿½á¹¹×´Ì¬
  */
 void DisableRootHubPort(void);
 
 /**
- * @brief   ·ÖÎöROOT-HUB×´Ì¬,´¦ÀíROOT-HUB¶Ë¿ÚµÄÉè±¸²å°ÎÊÂ¼þ
- *          Èç¹ûÉè±¸°Î³ö,º¯ÊýÖÐµ÷ÓÃDisableRootHubPort()º¯Êý,½«¶Ë¿Ú¹Ø±Õ,²åÈëÊÂ¼þ,ÖÃÏàÓ¦¶Ë¿ÚµÄ×´Ì¬Î»
+ * @brief   ï¿½ï¿½ï¿½ï¿½ROOT-HUB×´Ì¬,ï¿½ï¿½ï¿½ï¿½ROOT-HUBï¿½Ë¿Úµï¿½ï¿½è±¸ï¿½ï¿½ï¿½ï¿½Â¼ï¿½
+ *          ï¿½ï¿½ï¿½ï¿½è±¸ï¿½Î³ï¿½,ï¿½ï¿½ï¿½ï¿½ï¿½Ðµï¿½ï¿½ï¿½DisableRootHubPort()ï¿½ï¿½ï¿½ï¿½,ï¿½ï¿½ï¿½Ë¿Ú¹Ø±ï¿½,ï¿½ï¿½ï¿½ï¿½ï¿½Â¼ï¿½,ï¿½ï¿½ï¿½ï¿½Ó¦ï¿½Ë¿Úµï¿½×´Ì¬Î»
  *
- * @return  ·µ»ØERR_SUCCESSÎªÃ»ÓÐÇé¿ö,·µ»ØERR_USB_CONNECTÎª¼ì²âµ½ÐÂÁ¬½Ó,·µ»ØERR_USB_DISCONÎª¼ì²âµ½¶Ï¿ª
+ * @return  ï¿½ï¿½ï¿½ï¿½ERR_SUCCESSÎªÃ»ï¿½ï¿½ï¿½ï¿½ï¿½,ï¿½ï¿½ï¿½ï¿½ERR_USB_CONNECTÎªï¿½ï¿½âµ½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½,ï¿½ï¿½ï¿½ï¿½ERR_USB_DISCONÎªï¿½ï¿½âµ½ï¿½Ï¿ï¿½
  */
 uint8_t AnalyzeRootHub(void);
 
 /**
- * @brief   ÉèÖÃUSBÖ÷»úµ±Ç°²Ù×÷µÄUSBÉè±¸µØÖ·
+ * @brief   ï¿½ï¿½ï¿½ï¿½USBï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç°ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½USBï¿½è±¸ï¿½ï¿½Ö·
  *
- * @param   addr    - USBÉè±¸µØÖ·
+ * @param   addr    - USBï¿½è±¸ï¿½ï¿½Ö·
  */
 void SetHostUsbAddr(uint8_t addr);
 
 /**
- * @brief   ÉèÖÃµ±Ç°USBËÙ¶È
+ * @brief   ï¿½ï¿½ï¿½Ãµï¿½Ç°USBï¿½Ù¶ï¿½
  *
- * @param   FullSpeed   - USBËÙ¶È
+ * @param   FullSpeed   - USBï¿½Ù¶ï¿½
  */
 void SetUsbSpeed(uint8_t FullSpeed);
 
 /**
- * @brief   ¼ì²âµ½Éè±¸ºó,¸´Î»×ÜÏß,ÎªÃ¶¾ÙÉè±¸×¼±¸,ÉèÖÃÎªÄ¬ÈÏÎªÈ«ËÙ
+ * @brief   ï¿½ï¿½âµ½ï¿½è±¸ï¿½ï¿½,ï¿½ï¿½Î»ï¿½ï¿½ï¿½ï¿½,ÎªÃ¶ï¿½ï¿½ï¿½è±¸×¼ï¿½ï¿½,ï¿½ï¿½ï¿½ï¿½ÎªÄ¬ï¿½ï¿½ÎªÈ«ï¿½ï¿½
  */
 void ResetRootHubPort(void);
 
 /**
- * @brief   Ê¹ÄÜROOT-HUB¶Ë¿Ú,ÏàÓ¦µÄbUH_PORT_ENÖÃ1¿ªÆô¶Ë¿Ú,Éè±¸¶Ï¿ª¿ÉÄÜµ¼ÖÂ·µ»ØÊ§°Ü
+ * @brief   Ê¹ï¿½ï¿½ROOT-HUBï¿½Ë¿ï¿½,ï¿½ï¿½Ó¦ï¿½ï¿½bUH_PORT_ENï¿½ï¿½1ï¿½ï¿½ï¿½ï¿½ï¿½Ë¿ï¿½,ï¿½è±¸ï¿½Ï¿ï¿½ï¿½ï¿½ï¿½Üµï¿½ï¿½Â·ï¿½ï¿½ï¿½Ê§ï¿½ï¿½
  *
- * @return  ·µ»ØERR_SUCCESSÎª¼ì²âµ½ÐÂÁ¬½Ó,·µ»ØERR_USB_DISCONÎªÎÞÁ¬½Ó
+ * @return  ï¿½ï¿½ï¿½ï¿½ERR_SUCCESSÎªï¿½ï¿½âµ½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½,ï¿½ï¿½ï¿½ï¿½ERR_USB_DISCONÎªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
  */
 uint8_t EnableRootHubPort(void);
 
 /**
- * @brief   µÈ´ýUSBÖÐ¶Ï
+ * @brief   ï¿½È´ï¿½USBï¿½Ð¶ï¿½
  *
- * @return  ·µ»ØERR_SUCCESS Êý¾Ý½ÓÊÕ»òÕß·¢ËÍ³É¹¦,·µ»ØERR_USB_UNKNOWN Êý¾Ý½ÓÊÕ»òÕß·¢ËÍÊ§°Ü
+ * @return  ï¿½ï¿½ï¿½ï¿½ERR_SUCCESS ï¿½ï¿½ï¿½Ý½ï¿½ï¿½Õ»ï¿½ï¿½ß·ï¿½ï¿½Í³É¹ï¿½,ï¿½ï¿½ï¿½ï¿½ERR_USB_UNKNOWN ï¿½ï¿½ï¿½Ý½ï¿½ï¿½Õ»ï¿½ï¿½ß·ï¿½ï¿½ï¿½Ê§ï¿½ï¿½
  */
 uint8_t WaitUSB_Interrupt(void);
 
 /**
- * @brief   ´«ÊäÊÂÎñ,ÊäÈëÄ¿µÄ¶ËµãµØÖ·/PIDÁîÅÆ,Í¬²½±êÖ¾,ÒÔ20uSÎªµ¥Î»µÄNAKÖØÊÔ×ÜÊ±¼ä(0Ôò²»ÖØÊÔ,0xFFFFÎÞÏÞÖØÊÔ),·µ»Ø0³É¹¦,³¬Ê±/³ö´íÖØÊÔ
- *          ±¾×Ó³ÌÐò×ÅÖØÓÚÒ×Àí½â,¶øÔÚÊµ¼ÊÓ¦ÓÃÖÐ,ÎªÁËÌá¹©ÔËÐÐËÙ¶È,Ó¦¸Ã¶Ô±¾×Ó³ÌÐò´úÂë½øÐÐÓÅ»¯
+ * @brief   ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½,ï¿½ï¿½ï¿½ï¿½Ä¿ï¿½Ä¶Ëµï¿½ï¿½Ö·/PIDï¿½ï¿½ï¿½ï¿½,Í¬ï¿½ï¿½ï¿½ï¿½Ö¾,ï¿½ï¿½20uSÎªï¿½ï¿½Î»ï¿½ï¿½NAKï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½(0ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½,0xFFFFï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½),ï¿½ï¿½ï¿½ï¿½0ï¿½É¹ï¿½,ï¿½ï¿½Ê±/ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+ *          ï¿½ï¿½ï¿½Ó³ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½,ï¿½ï¿½ï¿½ï¿½Êµï¿½ï¿½Ó¦ï¿½ï¿½ï¿½ï¿½,Îªï¿½ï¿½ï¿½á¹©ï¿½ï¿½ï¿½ï¿½ï¿½Ù¶ï¿½,Ó¦ï¿½Ã¶Ô±ï¿½ï¿½Ó³ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Å»ï¿½
  *
- * @param   endp_pid    - ÁîÅÆºÍµØÖ·, ¸ß4Î»ÊÇtoken_pidÁîÅÆ, µÍ4Î»ÊÇ¶ËµãµØÖ·
- * @param   tog         - Í¬²½±êÖ¾
- * @param   timeout     - ³¬Ê±Ê±¼ä
+ * @param   endp_pid    - ï¿½ï¿½ï¿½ÆºÍµï¿½Ö·, ï¿½ï¿½4Î»ï¿½ï¿½token_pidï¿½ï¿½ï¿½ï¿½, ï¿½ï¿½4Î»ï¿½Ç¶Ëµï¿½ï¿½Ö·
+ * @param   tog         - Í¬ï¿½ï¿½ï¿½ï¿½Ö¾
+ * @param   timeout     - ï¿½ï¿½Ê±Ê±ï¿½ï¿½
  *
- * @return  ERR_USB_UNKNOWN ³¬Ê±£¬¿ÉÄÜÓ²¼þÒì³£
- *          ERR_USB_DISCON  Éè±¸¶Ï¿ª
- *          ERR_USB_CONNECT Éè±¸Á¬½Ó
- *          ERR_SUCCESS     ´«ÊäÍê³É
+ * @return  ERR_USB_UNKNOWN ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ó²ï¿½ï¿½ï¿½ì³£
+ *          ERR_USB_DISCON  ï¿½è±¸ï¿½Ï¿ï¿½
+ *          ERR_USB_CONNECT ï¿½è±¸ï¿½ï¿½ï¿½ï¿½
+ *          ERR_SUCCESS     ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
  */
 uint8_t USBHostTransact(uint8_t endp_pid, uint8_t tog, uint32_t timeout);
 
 /**
- * @brief   Ö´ÐÐ¿ØÖÆ´«Êä,8×Ö½ÚÇëÇóÂëÔÚpSetupReqÖÐ,DataBufÎª¿ÉÑ¡µÄÊÕ·¢»º³åÇø
+ * @brief   Ö´ï¿½Ð¿ï¿½ï¿½Æ´ï¿½ï¿½ï¿½,8ï¿½Ö½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½pSetupReqï¿½ï¿½,DataBufÎªï¿½ï¿½Ñ¡ï¿½ï¿½ï¿½Õ·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
  *
- * @param   DataBuf     - Èç¹ûÐèÒª½ÓÊÕºÍ·¢ËÍÊý¾Ý,ÄÇÃ´DataBufÐèÖ¸ÏòÓÐÐ§»º³åÇøÓÃÓÚ´æ·ÅºóÐøÊý¾Ý
- * @param   RetLen      - Êµ¼Ê³É¹¦ÊÕ·¢µÄ×Ü³¤¶È±£´æÔÚRetLenÖ¸ÏòµÄ×Ö½Ú±äÁ¿ÖÐ
+ * @param   DataBuf     - ï¿½ï¿½ï¿½ï¿½ï¿½Òªï¿½ï¿½ï¿½ÕºÍ·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½,ï¿½ï¿½Ã´DataBufï¿½ï¿½Ö¸ï¿½ï¿½ï¿½ï¿½Ð§ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ú´ï¿½Åºï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+ * @param   RetLen      - Êµï¿½Ê³É¹ï¿½ï¿½Õ·ï¿½ï¿½ï¿½ï¿½Ü³ï¿½ï¿½È±ï¿½ï¿½ï¿½ï¿½ï¿½RetLenÖ¸ï¿½ï¿½ï¿½ï¿½Ö½Ú±ï¿½ï¿½ï¿½ï¿½ï¿½
  *
- * @return  ERR_USB_BUF_OVER    IN×´Ì¬½×¶Î³ö´í
- *          ERR_SUCCESS         Êý¾Ý½»»»³É¹¦
+ * @return  ERR_USB_BUF_OVER    IN×´Ì¬ï¿½×¶Î³ï¿½ï¿½ï¿½
+ *          ERR_SUCCESS         ï¿½ï¿½ï¿½Ý½ï¿½ï¿½ï¿½ï¿½É¹ï¿½
  */
 uint8_t HostCtrlTransfer(uint8_t *DataBuf, uint8_t *RetLen);
 
 /**
- * @brief   ¸´ÖÆ¿ØÖÆ´«ÊäµÄÇëÇó°ü
+ * @brief   ï¿½ï¿½ï¿½Æ¿ï¿½ï¿½Æ´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
  *
- * @param   pReqPkt     - ¿ØÖÆÇëÇó°üµØÖ·
+ * @param   pReqPkt     - ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö·
  */
 void CopySetupReqPkg(const uint8_t *pReqPkt);
 
 /**
- * @brief   »ñÈ¡Éè±¸ÃèÊö·û,·µ»ØÔÚ pHOST_TX_RAM_Addr ÖÐ
+ * @brief   ï¿½ï¿½È¡ï¿½è±¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½,ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ pHOST_TX_RAM_Addr ï¿½ï¿½
  *
- * @return  ERR_USB_BUF_OVER    ÃèÊö·û³¤¶È´íÎó
- *          ERR_SUCCESS         ³É¹¦
+ * @return  ERR_USB_BUF_OVER    ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È´ï¿½ï¿½ï¿½
+ *          ERR_SUCCESS         ï¿½É¹ï¿½
  */
 uint8_t CtrlGetDeviceDescr(void);
 
 /**
- * @brief   »ñÈ¡ÅäÖÃÃèÊö·û,·µ»ØÔÚ pHOST_TX_RAM_Addr ÖÐ
+ * @brief   ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½,ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ pHOST_TX_RAM_Addr ï¿½ï¿½
  *
- * @return  ERR_USB_BUF_OVER    ÃèÊö·û³¤¶È´íÎó
- *          ERR_SUCCESS         ³É¹¦
+ * @return  ERR_USB_BUF_OVER    ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È´ï¿½ï¿½ï¿½
+ *          ERR_SUCCESS         ï¿½É¹ï¿½
  */
 uint8_t CtrlGetConfigDescr(void);
 
 /**
- * @brief   ÉèÖÃUSBÉè±¸µØÖ·
+ * @brief   ï¿½ï¿½ï¿½ï¿½USBï¿½è±¸ï¿½ï¿½Ö·
  *
- * @param   addr    - Éè±¸µØÖ·
+ * @param   addr    - ï¿½è±¸ï¿½ï¿½Ö·
  *
- * @return  ERR_SUCCESS     ³É¹¦
+ * @return  ERR_SUCCESS     ï¿½É¹ï¿½
  */
 uint8_t CtrlSetUsbAddress(uint8_t addr);
 
 /**
- * @brief   ÉèÖÃUSBÉè±¸ÅäÖÃ
+ * @brief   ï¿½ï¿½ï¿½ï¿½USBï¿½è±¸ï¿½ï¿½ï¿½ï¿½
  *
- * @param   cfg     - ÅäÖÃÖµ
+ * @param   cfg     - ï¿½ï¿½ï¿½ï¿½Öµ
  *
- * @return  ERR_SUCCESS     ³É¹¦
+ * @return  ERR_SUCCESS     ï¿½É¹ï¿½
  */
 uint8_t CtrlSetUsbConfig(uint8_t cfg);
 
 /**
- * @brief   Çå³ý¶ËµãSTALL
+ * @brief   ï¿½ï¿½ï¿½ï¿½Ëµï¿½STALL
  *
- * @param   endp    - ¶ËµãµØÖ·
+ * @param   endp    - ï¿½Ëµï¿½ï¿½Ö·
  *
- * @return  ERR_SUCCESS     ³É¹¦
+ * @return  ERR_SUCCESS     ï¿½É¹ï¿½
  */
 uint8_t CtrlClearEndpStall(uint8_t endp);
 
 /**
- * @brief   ÉèÖÃUSBÉè±¸½Ó¿Ú
+ * @brief   ï¿½ï¿½ï¿½ï¿½USBï¿½è±¸ï¿½Ó¿ï¿½
  *
- * @param   cfg     - ÅäÖÃÖµ
+ * @param   cfg     - ï¿½ï¿½ï¿½ï¿½Öµ
  *
- * @return  ERR_SUCCESS     ³É¹¦
+ * @return  ERR_SUCCESS     ï¿½É¹ï¿½
  */
 uint8_t CtrlSetUsbIntercace(uint8_t cfg);
 
 /**
- * @brief   USBÖ÷»ú¹¦ÄÜ³õÊ¼»¯
+ * @brief   USBï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ü³ï¿½Ê¼ï¿½ï¿½
  */
 void USB_HostInit(void);
-uint8_t EnumAllHubPort(void);// Ã¶¾ÙËùÓÐROOT-HUB¶Ë¿ÚÏÂÍâ²¿HUBºóµÄ¶þ¼¶USBÉè±¸
-void SelectHubPort(uint8_t HubPortIndex); // HubPortIndex=0Ñ¡Ôñ²Ù×÷Ö¸¶¨µÄROOT-HUB¶Ë¿Ú,·ñÔòÑ¡Ôñ²Ù×÷Ö¸¶¨µÄROOT-HUB¶Ë¿ÚµÄÍâ²¿HUBµÄÖ¸¶¨¶Ë¿Ú
-uint16_t SearchTypeDevice(uint8_t type); // ÔÚROOT-HUBÒÔ¼°Íâ²¿HUB¸÷¶Ë¿ÚÉÏËÑË÷Ö¸¶¨ÀàÐÍµÄÉè±¸ËùÔÚµÄ¶Ë¿ÚºÅ,Êä³ö¶Ë¿ÚºÅÎª0xFFFFÔòÎ´ËÑË÷µ½.
-uint8_t SETorOFFNumLock(uint8_t *buf); // NumLockµÄµãµÆÅÐ¶Ï
+uint8_t EnumAllHubPort(void);// Ã¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ROOT-HUBï¿½Ë¿ï¿½ï¿½ï¿½ï¿½â²¿HUBï¿½ï¿½Ä¶ï¿½ï¿½ï¿½USBï¿½è±¸
+void SelectHubPort(uint8_t HubPortIndex); // HubPortIndex=0Ñ¡ï¿½ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½ï¿½ï¿½ROOT-HUBï¿½Ë¿ï¿½,ï¿½ï¿½ï¿½ï¿½Ñ¡ï¿½ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½ï¿½ï¿½ROOT-HUBï¿½Ë¿Úµï¿½ï¿½â²¿HUBï¿½ï¿½Ö¸ï¿½ï¿½ï¿½Ë¿ï¿½
+uint16_t SearchTypeDevice(uint8_t type); // ï¿½ï¿½ROOT-HUBï¿½Ô¼ï¿½ï¿½â²¿HUBï¿½ï¿½ï¿½Ë¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½ï¿½ï¿½ï¿½Íµï¿½ï¿½è±¸ï¿½ï¿½ï¿½ÚµÄ¶Ë¿Úºï¿½,ï¿½ï¿½ï¿½ï¿½Ë¿Úºï¿½Îª0xFFFFï¿½ï¿½Î´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½.
+uint8_t SETorOFFNumLock(uint8_t *buf); // NumLockï¿½Äµï¿½ï¿½ï¿½Ð¶ï¿½
 
 /**
- * @brief   ³õÊ¼»¯Ö¸¶¨ROOT-HUB¶Ë¿ÚµÄUSBÉè±¸
+ * @brief   ï¿½ï¿½Ê¼ï¿½ï¿½Ö¸ï¿½ï¿½ROOT-HUBï¿½Ë¿Úµï¿½USBï¿½è±¸
  *
- * @return  ´íÎóÂë
+ * @return  ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
  */
 uint8_t InitRootDevice(void);
 
 /**
- * @brief   »ñÈ¡HIDÉè±¸±¨±íÃèÊö·û,·µ»ØÔÚTxBufferÖÐ
+ * @brief   ï¿½ï¿½È¡HIDï¿½è±¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½,ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½TxBufferï¿½ï¿½
  *
- * @return  ´íÎóÂë
+ * @return  ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
  */
 uint8_t CtrlGetHIDDeviceReport(uint8_t infc);
 
 /**
- * @brief   »ñÈ¡HUBÃèÊö·û,·µ»ØÔÚCom_BufferÖÐ
+ * @brief   ï¿½ï¿½È¡HUBï¿½ï¿½ï¿½ï¿½ï¿½ï¿½,ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Com_Bufferï¿½ï¿½
  *
- * @return  ´íÎóÂë
+ * @return  ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
  */
 uint8_t CtrlGetHubDescr(void);
 
 /**
- * @brief   ²éÑ¯HUB¶Ë¿Ú×´Ì¬,·µ»ØÔÚCom_BufferÖÐ
+ * @brief   ï¿½ï¿½Ñ¯HUBï¿½Ë¿ï¿½×´Ì¬,ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Com_Bufferï¿½ï¿½
  *
- * @param   HubPortIndex    - ¶Ë¿ÚºÅ
+ * @param   HubPortIndex    - ï¿½Ë¿Úºï¿½
  *
- * @return  ´íÎóÂë
+ * @return  ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
  */
 uint8_t HubGetPortStatus(uint8_t HubPortIndex);
 
 /**
- * @brief   ÉèÖÃHUB¶Ë¿ÚÌØÐÔ
+ * @brief   ï¿½ï¿½ï¿½ï¿½HUBï¿½Ë¿ï¿½ï¿½ï¿½ï¿½ï¿½
  *
- * @param   HubPortIndex    - ¶Ë¿ÚºÅ
- * @param   FeatureSelt     - ¶Ë¿ÚÌØÐÔ
+ * @param   HubPortIndex    - ï¿½Ë¿Úºï¿½
+ * @param   FeatureSelt     - ï¿½Ë¿ï¿½ï¿½ï¿½ï¿½ï¿½
  *
- * @return  ´íÎóÂë
+ * @return  ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
  */
 uint8_t HubSetPortFeature(uint8_t HubPortIndex, uint8_t FeatureSelt);
 
 /**
- * @brief   Çå³ýHUB¶Ë¿ÚÌØÐÔ
+ * @brief   ï¿½ï¿½ï¿½HUBï¿½Ë¿ï¿½ï¿½ï¿½ï¿½ï¿½
  *
- * @param   HubPortIndex    - ¶Ë¿ÚºÅ
- * @param   FeatureSelt     - ¶Ë¿ÚÌØÐÔ
+ * @param   HubPortIndex    - ï¿½Ë¿Úºï¿½
+ * @param   FeatureSelt     - ï¿½Ë¿ï¿½ï¿½ï¿½ï¿½ï¿½
  *
- * @return  ´íÎóÂë
+ * @return  ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
  */
 uint8_t HubClearPortFeature(uint8_t HubPortIndex, uint8_t FeatureSelt);
 
