@@ -37,12 +37,6 @@ const UINT8 MyManuInfo[] = {16, 03, 'W', 0, 'i', 0, 'n', 0, 'y', 0, 'u', 0, 'n',
 /// 产品信息:Winyunq USB2.0 Mouse
 const UINT8 ProduceInformation[] = {42, 03, 'W', 0, 'i', 0, 'n', 0, 'y', 0, 'u', 0, 'n', 0, 'q', 0, ' ', 0, 'U', 0, 'S', 0, 'B', 0, '2', 0, '.', 0, '0', 0, ' ', 0, 'M', 0, 'o', 0, 'u', 0, 's', 0, 'e', 0};
 
-
-
-/**********************************************************/
-UINT8 DevConfig, Ready;
-UINT8 SetupReqCode;
-UINT16 SetupReqLen;
 const UINT8 *pDescr;
 /******** 用户自定义分配端点RAM ****************************************/
 __attribute__((aligned(4))) UINT8 EP0_Databuf[64 + 64 + 64]; // ep0(64)+ep4_out(64)+ep4_in(64)

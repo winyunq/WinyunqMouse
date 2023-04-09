@@ -1,7 +1,7 @@
 #	生成hex文件目标 TARGET.hex
 TARGET = Winyunq
 #	riscv编译链路径
-ToolPath = 'C:\MounRiver\MounRiver_Studio\toolchain\RISC-V Embedded GCC\bin\'
+ToolPath = 'D:\WCH\RISC-V Embedded GCC\bin\'
 #临时文件路径
 BUILD_DIR = bin
 #	C源文件，添加格式:

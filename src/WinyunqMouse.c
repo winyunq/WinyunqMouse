@@ -174,7 +174,9 @@ GPIOB_IRQHandler(void)
  * @version         1.0.0
  */
 void GoSleep()
-{ // return 0;
+{ 
+  /// 在休眠之前先上报一次电量
+  battNotifyLevel();
   if (MouseConfigure.details.sleep)
   { // 为0表示静止睡眠
 
@@ -185,8 +187,7 @@ void GoSleep()
 
     PWR_PeriphWakeUpCfg(ENABLE, RB_SLP_GPIO_WAKE, Edge_ShortDelay);
     // SetSysClock( CLK_SOURCE_HSE_6_4MHz );
-    while (!GPIOB_ReadPortPin(GPIO_Pin_22))
-      ;
+    while (!GPIOB_ReadPortPin(GPIO_Pin_22));
     GPIOB_ITModeCfg(GPIO_Pin_22, GPIO_ITMode_FallEdge); // 下降沿唤醒 影响进入休眠，导致无法唤醒
     PFIC_EnableIRQ(GPIO_B_IRQn);
     LowPower_Shutdown(0); // 这里是直接掉电了,转动轨迹球重启唤醒
@@ -372,7 +373,7 @@ void MoveBySpeedDelay()
   /// @brief 此过程将为当前时刻插入的值进行加权。即对于队列第一个值，其权为2，其它值权为1。
   MoveDataBufferLeftRight[MoveDataPoint]=0;
  /// PFIC_EnableIRQ(GPIO_B_IRQn);
-  y/=(MoveDelayBufferSize);
+  x/=(MoveDelayBufferSize);
   MouseData.details.x = x;
   MouseData.details.y = y;
   MoveDataPoint++;
@@ -382,7 +383,7 @@ void MoveBySpeedDelay()
 }
 /**
  * @brief           检测位移，上报位移
- *  @details        检测在此期间各方向霍尔元件触发次数，从而确定在各方向的移动距离
+ *  @details        检测在此期间各方向霍尔元件触发次数，从而确定在各方向的移动距离。不使用任何算法。
  *
  *
  * */
@@ -413,7 +414,7 @@ void MoveByLocation()
     } // trackball下，以右手为例，方向逆时针旋转90°
     else
     {
-      MouseData.details.x = x;
+      MouseData.details.x = -x;
       MouseData.details.y = -y; // 非trackball下Y轴反向
     }
     if (MouseData.details.x < 0)
@@ -427,7 +428,7 @@ void MoveByLocation()
 }
 /**
  * @brief           鼠标上报事件
- *  @details        鼠标上报事件，立刻获取按键状态，移动数据，并判断是否形成了有效数据包。若数据包无效则无视且休眠计数。若数据包有效则提交数据报且清空休眠时间
+ *  @details        鼠标上报事件，立刻获取按键状态，移动数据，并判断是否形成了有效数据包。若数据包无效则无视且休眠计数。若数据包有效则提交数据报且清空休眠时间。
  *
  *
  * */
@@ -464,7 +465,10 @@ void MouseEvent()
     UsingSleepTime++;                                                           // 无操作时间计时
     if (UsingSleepTime * MouseConfigure.details.report > WinyunqMouseSleepTime) // 长时间处于无操作状态，进入睡眠模式
     {
-      GoSleep();
+      /// 只有使用蓝牙模式，即使用电池电源，才需要考虑休眠。事实上，该处逻辑应该还需要判断是否已连接USB。
+       #ifdef UsingBLE
+       GoSleep();
+       #endif
     }
   }
   else

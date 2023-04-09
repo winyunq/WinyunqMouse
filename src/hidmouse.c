@@ -385,6 +385,7 @@ static void hidEmuStateCB( gapRole_States_t newState , gapRoleEvent_t * pEvent )
 
     case GAPROLE_CONNECTED_ADV:
       PRINT( "Connected Advertising..\n" );
+      battNotifyLevel();
       break;      
     
     case GAPROLE_WAITING:

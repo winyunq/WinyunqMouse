@@ -157,7 +157,7 @@ static bStatus_t battWriteAttrCB( uint16 connHandle, gattAttribute_t *pAttr,
                                   uint8 *pValue, uint16 len, uint16 offset,uint8 method );
 static void battNotifyCB( linkDBItem_t *pLinkItem );
 static uint8 battMeasure( void );
-static void battNotifyLevel( void );
+void battNotifyLevel( void );
 
 /*********************************************************************
  * PROFILE CALLBACKS
@@ -537,7 +537,7 @@ inline uint8 battMeasure( void )
  *
  * @return  None.
  */
-static void battNotifyLevel( void )
+void battNotifyLevel( void )
 {
   // Execute linkDB callback to send notification
   linkDB_PerformFunc( battNotifyCB );
