@@ -75,7 +75,7 @@ void MouseInit()
     MouseConfigure.details.trackball = 0;
     MouseConfigure.details.help = 0;
     MouseConfigure.details.LEDOn = 0;
-    MouseConfigure.details.speed = 7;
+    MouseConfigure.details.speed = 5;
     MouseConfigure.details.report = 17;
     MouseConfigure.details.sleep = 3;
     MouseConfigure.data[MouseConfigureSize - 1] = 17;
@@ -398,6 +398,7 @@ void MoveBySpeedDelay()
     MoveDataPoint = 0;
   }
 }
+#ifndef UsingUPDowmHallEdge
 /**
  * @brief           检测位移，上报位移
  *  @details        检测在此期间各方向霍尔元件触发次数，从而确定在各方向的移动距离。不使用任何算法。
@@ -418,69 +419,11 @@ void MoveByLocation()
 {
 
   int x = 0, y = 0;
-  #ifdef UsingUPDowmHallEdge
-  if(MoveUPDownInterruptFrom==MoveUP){
-    y=-UPDownTime;
-  }
-  else{
-    y=UPDownTime;
-  }
-  if(MoveLeftRightInterruptFrom==MoveRight){
-    x=LeftRightTime;
-  }
-  else{
-    x=-LeftRightTime;
-  }
-  if(UPDownTime<0){
-    if(NowUPDownGroupInterruptForward==MoveUP){
-      NowUPDownGroupInterruptForward=MoveDown;
-    }
-    else{
-      NowUPDownGroupInterruptForward=MoveUP;
-    }
-    /// 主动进行一次预测，待讨论
-    if(NowUPDownGroupInterruptForward){
-      /// 当前为上升沿状态，准备切换到下降沿状态
-      NowUPDownGroupInterruptForward=0;
-      /// 将中断方向修改为下降沿
-      R32_PA_CLR |= MoveUPDown;
-    }
-    else{
-      /// 当前为下降沿状态，准备切换到上升沿状态
-      NowUPDownGroupInterruptForward=1;
-      /// 将中断修改为上升沿
-      R32_PA_OUT |= MoveUPDown;
-    }
-  }
-  if(LeftRightTime<0){
-    if(NowLeftRightGroupInterruptForward==MoveRight){
-      NowLeftRightGroupInterruptForward=MoveLeft;
-    }
-    else{
-      NowLeftRightGroupInterruptForward=MoveRight;
-    }
-    /// 主动进行一次预测，待讨论
-    if(NowLeftRightGroupInterruptForward){
-      /// 当前为上升沿状态，准备切换到下降沿状态
-      NowLeftRightGroupInterruptForward=0;
-      /// 将中断方向修改为下降沿
-      R32_PB_CLR |= MoveLeftRight;
-    }
-    else{
-      /// 当前为下降沿状态，准备切换到上升沿状态
-      NowLeftRightGroupInterruptForward=1;
-      /// 将中断修改为上升沿
-      R32_PB_OUT |= MoveLeftRight;
-    }
-  }
-  UPDownTime=0;
-  LeftRightTime=0;
-  #else
+
   x = RightTime - LeftTime;
   LeftTime = RightTime = 0;
   y = DownTime - UPTime;
   UPTime = DownTime = 0;
-  #endif
   if (!MouseConfigure.details.help)
   {
     if (MouseConfigure.details.trackball)
@@ -502,6 +445,7 @@ void MoveByLocation()
   }
   MouseData.details.z = 0; // 计算需要上报的数据
 }
+#endif
 /**
  * @brief           鼠标上报事件
  *  @details        鼠标上报事件，立刻获取按键状态，移动数据，并判断是否形成了有效数据包。若数据包无效则无视且休眠计数。若数据包有效则提交数据报且清空休眠时间。
