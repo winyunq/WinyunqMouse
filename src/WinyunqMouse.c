@@ -27,6 +27,21 @@ uint8 Sleep;
 /// 上一次上报数据包时上报的按键状态
 uint8 LastClick;
 /// 上的霍尔触发次数
+#ifdef UsingUPDowmHallEdge
+/// @brief 触发上下移动中断的GPIO来源
+uint32_t MoveUPDownInterruptFrom=MoveDown;
+/// @brief 上下移动触发中断累计次数
+uint32_t UPDownTime;
+/// @brief 当前上下移动中断状态，0：当前是下降沿；1：当前是上升沿
+uint8_t NowUPDownGroupInterruptForward;
+/// @brief 触发左右移动中断的GPIO来源
+uint32_t MoveLeftRightInterruptFrom=MoveRight;
+/// @brief 左右移动触发中断累计次数
+uint32_t LeftRightTime;
+/// @brief 当前左右移动中断状态，0：当前是下降沿；1：当前是上升沿
+uint8_t NowLeftRightGroupInterruptForward;
+#else
+#endif
 int32 UPTime,
     /// 下的霍尔触发次数
     DownTime,
@@ -119,12 +134,34 @@ __attribute__((interrupt("WCH-Interrupt-fast")))
 __attribute__((section(".highcode"))) void
 GPIOA_IRQHandler(void)
 {
+  #ifdef UsingUPDowmHallEdge
+  if(GPIOA_ReadITFlagPort()==MoveUPDownInterruptFrom){
+    MoveUPDownInterruptFrom++;
+    if(NowUPDownGroupInterruptForward){
+      /// 当前为上升沿状态，准备切换到下降沿状态
+      NowUPDownGroupInterruptForward=0;
+      /// 将中断方向修改为下降沿
+      R32_PA_CLR |= MoveUPDown;
+    }
+    else{
+      /// 当前为下降沿状态，准备切换到上升沿状态
+      NowUPDownGroupInterruptForward=1;
+      /// 将中断修改为上升沿
+      R32_PA_OUT |= MoveUPDown;
+    }
+  }
+  else{
+    /// 该中断来自于反方向，不进行中断预测方向修正，除非在MouseEvent()中处理xy数据时方向确实发生改变，即交给MouseEvent()切换方向
+    MoveUPDownInterruptFrom--;
+  }
+  #else
   if (GPIOA_ReadITFlagBit(MoveUP))
     UPTime++;
   else
     DownTime++;
   LastMoveUPDownTime = NowMoveUPDownTime;
   NowMoveUPDownTime = TMOS_GetSystemClock();
+  #endif
   GPIOA_ClearITFlagBit(-1);
 }
 /**
@@ -147,6 +184,27 @@ __attribute__((interrupt("WCH-Interrupt-fast")))
 __attribute__((section(".highcode"))) void
 GPIOB_IRQHandler(void)
 {
+  #ifdef UsingUPDowmHallEdge
+  if(GPIOB_ReadITFlagPort()==MoveLeftRightInterruptFrom){
+    MoveLeftRightInterruptFrom++;
+    if(NowLeftRightGroupInterruptForward){
+      /// 当前为上升沿状态，准备切换到下降沿状态
+      NowLeftRightGroupInterruptForward=0;
+      /// 将中断方向修改为下降沿
+      R32_PB_CLR |= MoveLeftRight;
+    }
+    else{
+      /// 当前为下降沿状态，准备切换到上升沿状态
+      NowLeftRightGroupInterruptForward=1;
+      /// 将中断修改为上升沿
+      R32_PB_OUT |= MoveLeftRight;
+    }
+  }
+  else{
+    /// 该中断来自于反方向，不进行中断预测方向修正，除非在MouseEvent()中处理xy数据时方向确实发生改变，即交给MouseEvent()切换方向
+    MoveUPDownInterruptFrom--;
+  }
+  #else
   if (GPIOB_ReadITFlagBit(MoveLeft))
   {
     LeftTime++;
@@ -155,6 +213,7 @@ GPIOB_IRQHandler(void)
     RightTime++;
   LastMoveLeftRightTime = NowMoveLeftRightTime;
   NowMoveLeftRightTime = TMOS_GetSystemClock();
+  #endif
   GPIOB_ClearITFlagBit(-1); // 后期有可能将轨迹球的GPIO拆为两部分
 }
 /**
@@ -401,10 +460,67 @@ void MoveByLocation()
 {
 
   int x = 0, y = 0;
+  #ifdef UsingUPDowmHallEdge
+  if(NowUPDownGroupInterruptForward==MoveUP){
+    y=-NowMoveUPDownTime;
+  }
+  else{
+    y=NowMoveUPDownTime;
+  }
+  if(NowLeftRightGroupInterruptForward==MoveRight){
+    x=NowMoveLeftRightTime;
+  }
+  else{
+    x=-NowMoveLeftRightTime;
+  }
+  if(NowMoveUPDownTime<0){
+    if(NowUPDownGroupInterruptForward==MoveUP){
+      NowUPDownGroupInterruptForward=MoveDown;
+    }
+    else{
+      NowUPDownGroupInterruptForward=MoveUP;
+    }
+    /// 主动进行一次预测，待讨论
+    if(NowUPDownGroupInterruptForward){
+      /// 当前为上升沿状态，准备切换到下降沿状态
+      NowUPDownGroupInterruptForward=0;
+      /// 将中断方向修改为下降沿
+      R32_PA_CLR |= MoveUPDown;
+    }
+    else{
+      /// 当前为下降沿状态，准备切换到上升沿状态
+      NowUPDownGroupInterruptForward=1;
+      /// 将中断修改为上升沿
+      R32_PA_OUT |= MoveUPDown;
+    }
+  }
+  if(NowMoveLeftRightTime<0){
+    if(NowLeftRightGroupInterruptForward==MoveRight){
+      NowLeftRightGroupInterruptForward=MoveLeft;
+    }
+    else{
+      NowLeftRightGroupInterruptForward=MoveRight;
+    }
+    /// 主动进行一次预测，待讨论
+    if(NowLeftRightGroupInterruptForward){
+      /// 当前为上升沿状态，准备切换到下降沿状态
+      NowLeftRightGroupInterruptForward=0;
+      /// 将中断方向修改为下降沿
+      R32_PB_CLR |= MoveLeftRight;
+    }
+    else{
+      /// 当前为下降沿状态，准备切换到上升沿状态
+      NowLeftRightGroupInterruptForward=1;
+      /// 将中断修改为上升沿
+      R32_PB_OUT |= MoveLeftRight;
+    }
+  }
+  #else
   x = RightTime - LeftTime;
   LeftTime = RightTime = 0;
   y = DownTime - UPTime;
   UPTime = DownTime = 0;
+  #endif
   if (!MouseConfigure.details.help)
   {
     if (MouseConfigure.details.trackball)
