@@ -41,7 +41,6 @@ void Main_Circulation()
         TMOS_SystemProcess();
         #else
         MouseEvent();
-        mDelaymS(10);
         #endif
     }
 }

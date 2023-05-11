@@ -18,6 +18,7 @@ typedef unsigned long UINT32;
 
 #include "WinyunqMouse.h"
 #include "WinyunqConfigure.h"
+#include "WinyunqMouseHallDriver.h"
 //#include "USBMouse.h"
 extern uint8 HidDev_Report(uint8 id, uint8 type, uint8 len, uint8 *pData); // 上报函数
 /// 上次上，下，左，右的霍尔触发时间
@@ -75,7 +76,7 @@ void MouseInit()
     MouseConfigure.details.trackball = 0;
     MouseConfigure.details.help = 0;
     MouseConfigure.details.LEDOn = 0;
-    MouseConfigure.details.speed = 5;
+    MouseConfigure.details.speed = 3;
     MouseConfigure.details.report = 17;
     MouseConfigure.details.sleep = 3;
     MouseConfigure.data[MouseConfigureSize - 1] = 17;
@@ -474,7 +475,7 @@ void MouseEvent()
     MoveByLocation();
   }*/
   #ifdef UsingUSB
-  MoveByLocation();
+   MoveByHallSpeedHalf();
   #else
   MoveBySpeedDelay();
   #endif
