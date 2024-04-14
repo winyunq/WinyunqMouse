@@ -99,6 +99,8 @@ static gattCharCfg_t battLevelClientCharCfg[GATT_MAX_NUM_CONN];
 // HID Report Reference characteristic descriptor, battery level
 static uint8 hidReportRefBattLevel[HID_REPORT_REF_LEN] =
              { HID_RPT_ID_BATT_LEVEL_IN, HID_REPORT_TYPE_INPUT };
+/// @brief TMOS锂电池电量上报进程
+tmosTaskID PowerID;
 
 /*********************************************************************
  * Profile Attributes - Table
@@ -171,11 +173,9 @@ gattServiceCBs_t battCBs =
 };
 
 
-tmosTaskID PowerID;
-
 uint16 PowerTask( uint8 task_id, uint16 events ){
   Batt_MeasLevel();
-  tmos_start_task( PowerID,3,PowerTask);
+  tmos_start_task( PowerID,10000,PowerTask);
   return 0;
 }
 /*********************************************************************
@@ -206,7 +206,8 @@ bStatus_t Batt_AddService( void )
                                         GATT_NUM_ATTRS( battAttrTbl ),
 										GATT_MAX_ENCRYPT_KEY_SIZE,
                                         &battCBs );
-
+  PowerID=TMOS_ProcessEventRegister( PowerTask );
+  tmos_start_task(PowerID,10000,PowerTask);
   return ( status );
 }
 

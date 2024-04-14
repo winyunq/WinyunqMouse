@@ -68,8 +68,12 @@ int32 UPTime,
  */
 void MouseInit()
 {
+  /// 初始化数据
   MouseData.data = 0;
+  UPTime = DownTime = LeftTime = RightTime = 0;
+  /// 加载EEPROM中存储的配置数据
   EEPROM_READ(0, MouseConfigure.data, MouseConfigureSize); // 读取保存的状态位
+  /// 检测鼠标是否初始化过，若MouseConfigureSize - 1处数据为17，则已经初始化过，否则需要执行下列代码初始化
   if (MouseConfigure.data[MouseConfigureSize - 1] != 17)
   {
     MouseConfigure.details.right = 0;
@@ -80,12 +84,13 @@ void MouseInit()
     MouseConfigure.details.report = 17;
     MouseConfigure.details.sleep = 3;
     MouseConfigure.data[MouseConfigureSize - 1] = 17;
+    /// 将初始化数据保存至EEPROM
     EEPROM_WRITE(0, MouseConfigure.data, MouseConfigureSize);
   }
+  /// 轨迹球移动中断初始化
   GPIOB_ModeCfg(LeftTouch, GPIO_ModeIN_PU); // left按下,默认高电平,按钮按下低电平
   GPIOA_ModeCfg(MoveUPDown, GPIO_ModeIN_Floating);
   {
-
     R16_PA_INT_MODE |= MoveUPDown;
     R32_PA_CLR |= MoveUPDown;
     R32_PA_OUT |= MoveUPDown;
@@ -106,13 +111,14 @@ void MouseInit()
   }
   // GPIOA_ITModeCfg(MoveGroup, GPIO_ITMode_RiseEdge);
   PFIC_EnableIRQ(GPIO_B_IRQn);
-  UPTime = DownTime = LeftTime = RightTime = 0;
-
+  /// 初始化霍尔供电
   GPIOA_ModeCfg(trackballpower, GPIO_ModeOut_PP_20mA);
+  /// 判断鼠标配置是否使用了轨迹球，如果是则打开霍尔供电，如果否则关闭霍尔供电
   if (MouseConfigure.details.help) // help仅使用右键，不需要向霍尔供电
     GPIOA_ResetBits(trackballpower);
   else // 向霍尔供电
     GPIOA_SetBits(trackballpower);
+  /// 鼠标外设初始化完成，初始化LED灯，LED灯将常量三秒
   InitLED();
 }
 #ifndef UsingUPDowmHallEdge
@@ -195,20 +201,32 @@ void GoSleep()
 { 
   /// 在休眠之前先上报一次电量
   battNotifyLevel();
+  /// 判断鼠标是否允许休眠，为0表示禁止睡眠
   if (MouseConfigure.details.sleep)
-  { // 为0表示静止睡眠
-
-    GPIOA_ResetBits(LEDIndicator); // 关掉LED
+  {
+    /// 关掉LED灯
+    GPIOA_ResetBits(LEDIndicator); 
     PFIC_DisableIRQ(GPIO_A_IRQn);
-
+    /// 关掉霍尔供电
     GPIOA_ResetBits(trackballpower);
-
     PWR_PeriphWakeUpCfg(ENABLE, RB_SLP_GPIO_WAKE, Edge_ShortDelay);
     // SetSysClock( CLK_SOURCE_HSE_6_4MHz );
-    while (!GPIOB_ReadPortPin(GPIO_Pin_22));
-    GPIOB_ITModeCfg(GPIO_Pin_22, GPIO_ITMode_FallEdge); // 下降沿唤醒 影响进入休眠，导致无法唤醒
+    /// 在进入休眠之前先确保按键处于抬起状态，确保可以正常唤醒
+    while (1){
+      /// 按键已经抬起
+      if(GPIOB_ReadPortPin(GPIO_Pin_22)){
+        /// 防止抖动
+        DelayMs(50);
+        if(GPIOB_ReadPortPin(GPIO_Pin_22)){
+          break;
+        }
+      }
+    }
+    // 下降沿唤醒 影响进入休眠，导致无法唤醒
     PFIC_EnableIRQ(GPIO_B_IRQn);
-    LowPower_Shutdown(0); // 这里是直接掉电了,转动轨迹球重启唤醒
+    GPIOB_ITModeCfg(GPIO_Pin_22, GPIO_ITMode_FallEdge); 
+    /// 系统掉电了,转动轨迹球重启唤醒
+    LowPower_Shutdown(0); 
   }
 }
 /**

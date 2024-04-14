@@ -13,7 +13,6 @@
 #include "WinyunqConfigure.h"
 #define LEDLock 0x80
 #define LightChange 0x40
-extern tmosTaskID PowerID;
 tmosTaskID ConnectPower;
 /// 没有连接设备，等待配对的标志位
 uint8 noConnect=0;
@@ -130,7 +129,7 @@ extern uint16 PowerTask( uint8 task_id, uint16 events );
  * @version         1.0.0
  */
 void InitLED(){
-  PowerID=TMOS_ProcessEventRegister( PowerTask );
+
   LockLED(7520);//信号引脚默认为高,之后允许修改
   GPIOA_ModeCfg(LEDIndicator,GPIO_ModeOut_PP_5mA);//初始化信号引脚，低电压点亮
     GPIOA_SetBits(LEDIndicator);
