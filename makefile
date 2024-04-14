@@ -7,7 +7,7 @@ BUILD_DIR = bin
 #	芯片型号
 BoardVersion = CH59x
 # 部分系统参数
-ConfigureFlag = -DDEBUG=0 -DCLK_OSC32K=2 -DDCDC_ENABLE=0 -DHAL_SlEEP=1 -DBLE_TX_POWER=0x25
+ConfigureFlag = -DDEBUG=0 -DCLK_OSC32K=2 -DDCDC_ENABLE=0 -DHAL_SlEEP=1 -DBLE_TX_POWER=0x25 -D$(BoardVersion)
 #	C源文件，添加格式:
 #	C_SOURCES += $(wildcard <C文件路径>/*.c )
 C_SOURCES += $(wildcard src/*.c ) 
@@ -29,7 +29,7 @@ CONFIGURES = -include src/include/Configure.h
 ifeq ($(BoardVersion),CH57x)
 #	启动文件
 ASM_SOURCES =  \
-libs/$(BoardVersion)/Startup/startup_CH573.S
+libs/$(BoardVersion)/Startup/startup_CH573.s
 #	链接文件
 LDSCRIPT = libs/$(BoardVersion)/Ld/Link.ld
 #	蓝牙库
@@ -44,7 +44,7 @@ endif
 ifeq ($(BoardVersion),CH59x)
 #	启动文件
 ASM_SOURCES =  \
-libs/$(BoardVersion)/Startup/startup_CH592.S
+libs/$(BoardVersion)/Startup/startup_CH592.s
 #	链接文件
 LDSCRIPT = libs/$(BoardVersion)/Ld/Link.ld
 #	蓝牙库

@@ -18,6 +18,9 @@
 /*********************************************************************
  * GLOBAL TYPEDEFS
  */
+
+#define BLEInit() BoardVersion##_BLEInit()
+
 __attribute__((aligned(4))) uint32_t MEM_BUF[BLE_MEMHEAP_SIZE / 4];
 
 #if(defined(BLE_MAC)) && (BLE_MAC == TRUE)
@@ -77,7 +80,12 @@ int main(void)
 #endif
 /// 支持蓝牙状态下，需要进行的蓝牙初始化
 #ifdef UsingBLE
+#ifdef CH57x
     CH57X_BLEInit();
+#endif
+#ifdef CH59x
+    CH59x_BLEInit();
+#endif
     HAL_Init();
     GAPRole_PeripheralInit();
     HidDev_Init();

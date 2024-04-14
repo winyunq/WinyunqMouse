@@ -16,6 +16,10 @@ BYTE4 – 滚轮变化*/
 #include "WinyunqConfigure.h"
 #include "WinyunqMouseHallDriver.h"
 //#include "USBMouse.h"
+    
+/// 该代码理应使用CH573枚举的Edge_ShortDelay，但由于CH579平台下没有该定义，只有short与long，故此重新定义
+#define Edge_ShortDelay 1
+
 extern uint8 HidDev_Report(uint8 id, uint8 type, uint8 len, uint8 *pData); // 上报函数
 /// 上次上，下，左，右的霍尔触发时间
 uint32_t LastMoveUPDownTime, NowMoveUPDownTime, LastMoveLeftRightTime, NowMoveLeftRightTime;
