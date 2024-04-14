@@ -1,7 +1,6 @@
 #ifndef WINYUNQMOUSE_H
 #define WINYUNQMOUSE_H
 #include "CONFIG.h"
-#include "CH57x_common.h"
 #include "HAL.h"
 extern void MouseEvent();
 extern void MouseInit();

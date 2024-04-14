@@ -11,10 +11,6 @@ BYTE2 – X坐标变化量，与byte的bit4组成9位符号数,负数表示fleft
 BYTE3 – Y坐标变化量，与byte的bit5组成9位符号数，负数表示fdown移，正数表上移。用补码表示变化量
 BYTE4 – 滚轮变化*/
 #define __WINYUNQMOUSE_C
-typedef unsigned char uint8;
-typedef signed short int16;
-typedef signed long int32;
-typedef unsigned long UINT32;
 
 #include "WinyunqMouse.h"
 #include "WinyunqConfigure.h"

@@ -14,7 +14,6 @@
 
 
 #include "CONFIG.h"
-#include "CH57x_common.h"
 #include "battservice.h"
 #include "scanparamservice.h"
 #include "devinfoservice.h"

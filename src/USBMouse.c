@@ -10,7 +10,6 @@
  * Copyright (c) 2023  Winyunq科技公司
  */
 #include "WinyunqMouse.h"
-#include "CH57x_common.h"
 
 #define DevEP0SIZE 0x40
 /// HID类报表描述符，此处为USB鼠标数据报表

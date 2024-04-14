@@ -12,7 +12,6 @@
  */
 
 #include "CONFIG.h"
-#include "CH57x_common.h"
 #include "battservice.h"
 #include "devinfoservice.h"
 #include "hiddev.h"

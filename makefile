@@ -4,33 +4,56 @@ TARGET = Winyunq
 ToolPath = 'D:\WCH\RISC-V Embedded GCC\bin\'
 #临时文件路径
 BUILD_DIR = bin
+#	芯片型号
+BoardVersion = CH59x
+# 部分系统参数
+ConfigureFlag = -DDEBUG=0 -DCLK_OSC32K=2 -DDCDC_ENABLE=0 -DHAL_SlEEP=1 -DBLE_TX_POWER=0x25
 #	C源文件，添加格式:
 #	C_SOURCES += $(wildcard <C文件路径>/*.c )
 C_SOURCES += $(wildcard src/*.c ) 
-C_SOURCES += $(wildcard libs/HAL/*.c )
-C_SOURCES += $(wildcard libs/Profile/*.c )
-C_SOURCES += $(wildcard libs/StdPeriphDriver/*.c )
+C_SOURCES += $(wildcard src/Profile/*.c )
+C_SOURCES += $(wildcard libs/$(BoardVersion)/HAL/*.c )
+C_SOURCES += $(wildcard libs/$(BoardVersion)/StdPeriphDriver/*.c )
 #	头文件，添加格式:
 #	-I<头文件路径> \ 
 C_INCLUDES =  \
 -Isrc/include \
--Ilibs/HAL/include \
--Ilibs/LIB \
--Ilibs/Profile/include \
--Ilibs/RVMSIS \
--Ilibs/StdPeriphDriver/inc \
+-Isrc/Profile/include \
+-Ilibs/$(BoardVersion)/HAL/include \
+-Ilibs/$(BoardVersion)/LIB \
+-Ilibs/$(BoardVersion)/RVMSIS \
+-Ilibs/$(BoardVersion)/StdPeriphDriver/inc \
+# 全局性质头文件
+CONFIGURES = -include src/include/Configure.h
+#	CH57x库文件
+ifeq ($(BoardVersion),CH57x)
 #	启动文件
 ASM_SOURCES =  \
-libs/Startup/startup_CH573.s
+libs/$(BoardVersion)/Startup/startup_CH573.S
 #	链接文件
-LDSCRIPT = libs/Ld/Link.ld
+LDSCRIPT = libs/$(BoardVersion)/Ld/Link.ld
 #	蓝牙库
 LIBS = -lISP573 -lCH57xBLE
 LIBDIR = \
--Llibs/LIB \
--Llibs/StdPeriphDriver
-# 全局性质头文件
-CONFIGURES = -include src/include/Configure.h
+-Llibs/$(BoardVersion)/LIB \
+-Llibs/$(BoardVersion)/StdPeriphDriver
+endif
+ifeq ($(BoardVersion),CH58x)
+endif
+#	CH59x库文件
+ifeq ($(BoardVersion),CH59x)
+#	启动文件
+ASM_SOURCES =  \
+libs/$(BoardVersion)/Startup/startup_CH592.S
+#	链接文件
+LDSCRIPT = libs/$(BoardVersion)/Ld/Link.ld
+#	蓝牙库
+LIBS = -lISP592 -lCH59xBLE
+LIBDIR = \
+-Llibs/$(BoardVersion)/LIB \
+-Llibs/$(BoardVersion)/StdPeriphDriver
+endif
+
 #	GCC编译链，可修改 ToolPath 的值指定GCC编译链路径，同时可修改 riscv-none-embed- 前缀，指定不同目标
 PREFIX = $(ToolPath)riscv-none-embed-
 CC = $(PREFIX)gcc
@@ -39,9 +62,7 @@ CP = $(PREFIX)objcopy
 SZ = $(PREFIX)size
 LD = $(PREFIX)LD
 HEX = $(PREFIX)objcopy -O ihex 
-
-ConfigureFlag = -DDEBUG=0 -DCLK_OSC32K=2 -DDCDC_ENABLE=0 -DHAL_SlEEP=1 -DBLE_TX_POWER=0x25
-
+#	编译标志
 CFLAGS = -march=rv32imac -mabi=ilp32 -mcmodel=medany -msmall-data-limit=8 -mno-save-restore -Os -fmessage-length=0 -fsigned-char -ffunction-sections -fdata-sections -fno-common $(ConfigureFlag) -g -Wall $(C_INCLUDES)
 ASFLAGS = -march=rv32imac -mabi=ilp32 -mcmodel=medany -msmall-data-limit=8 -mno-save-restore -Os -fmessage-length=0 -fsigned-char -ffunction-sections -fdata-sections -fno-common  -g -x assembler
 CFLAGS += -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@)" -c -o "$@" "$<"

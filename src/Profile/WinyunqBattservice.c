@@ -13,7 +13,6 @@
 #include "CONFIG.h"
 #include "hiddev.h"
 #include "battservice.h"
-#include "CH573SFR.h"
 #include "WinyunqMouse.h"
 
 /*********************************************************************

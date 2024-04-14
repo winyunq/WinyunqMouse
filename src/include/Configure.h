@@ -48,7 +48,6 @@
 #define WinyunqMouseSleepTime  MouseConfigure.details.sleep*5*2000
 /// 移动模式下，当鼠标速度过快时，会进入高速移动模式，此参数用于设定高速阈值
 #define WinyunqMouseMoveSpeedListTime MouseConfigure.details.speed*5*20
-typedef char boolean;
 #define MouseConfigureSize 8
 //支持权限设定
 #define ConfigureSetting ( SupportLeftRightTouch|SupportTrackBall|SupportWorkAsHelp|SupportLED|SUpportMoveTypeBySpeed )
@@ -60,3 +59,78 @@ typedef char boolean;
 /// 关掉的时钟
 #define CloseClock RB_SLP_CLK_TMR0|RB_SLP_CLK_TMR1|RB_SLP_CLK_TMR2|RB_SLP_CLK_TMR3|RB_SLP_CLK_UART0|RB_SLP_CLK_UART1|RB_SLP_CLK_UART2|RB_SLP_CLK_UART3|RB_SLP_CLK_SPI0|\
 RB_SLP_CLK_PWMX|RB_SLP_CLK_USB|RB_SLP_USB_WAKE|RB_SLP_RTC_WAKE
+
+/// 数据类型定义
+
+typedef char boolean;
+typedef unsigned char uint8;
+typedef signed short int16;
+typedef signed long int32;
+typedef unsigned long UINT32;
+
+#ifndef BOOL
+typedef unsigned char                   BOOL;
+#endif
+#ifndef s8
+typedef signed char                     s8;
+#endif
+#ifndef s16
+typedef signed short                    s16;
+#endif
+#ifndef s32
+typedef signed long                     s32;
+#endif
+#ifndef u8
+typedef unsigned char                   u8;
+#endif
+#ifndef u16
+typedef unsigned short                  u16;
+#endif
+#ifndef u32
+typedef unsigned long                   u32;
+#endif
+#ifndef u64
+typedef unsigned long long              u64;
+#endif
+#ifndef u8C
+typedef const unsigned char             u8C;
+#endif
+#ifndef u32V
+typedef unsigned long volatile          u32V;
+#endif
+#ifndef int8
+typedef signed char                     int8;
+#endif
+#ifndef int16
+typedef short                           int16;
+#endif
+#ifndef int32
+typedef signed long                     int32;
+#endif
+#ifndef uint8
+typedef unsigned char                   uint8;
+#endif
+#ifndef uint16
+typedef unsigned short                  uint16;
+#endif
+#ifndef uint32
+typedef unsigned long                   uint32;
+#endif
+#ifndef int8_t
+typedef signed char                     int8_t;
+#endif
+#ifndef int16_t
+typedef short                           int16_t;
+#endif
+#ifndef int32_t
+typedef signed long                     int32_t;
+#endif
+#ifndef uint8_t
+typedef unsigned char                   uint8_t;
+#endif
+#ifndef uint16_t
+typedef unsigned short                  uint16_t;
+#endif
+#ifndef uint32_t
+typedef unsigned long                   uint32_t;
+#endif
