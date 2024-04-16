@@ -55,15 +55,7 @@ void Main_Circulation()
  * 
  * @return          int类型               程序是否正常退出                                                    
  *  @retval         0                    正常退出
- * *//*
- * 创建者:             Winyunq
- * 创建日期:            2023-04-09
  * 
- *      《初始化》
- * 修订内容:            创建函数
- * @author          Winyunq进行完善
- * @date            2023-04-09
- * @version         1.0.0
  */
 int main(void)
 {
@@ -80,10 +72,10 @@ int main(void)
 #endif
 /// 支持蓝牙状态下，需要进行的蓝牙初始化
 #ifdef UsingBLE
-#ifdef CH57x
+#if(CHIP_ID ==ID_CH573)
     CH57X_BLEInit();
 #endif
-#ifdef CH59x
+#if(CHIP_ID ==ID_CH592)
     CH59x_BLEInit();
 #endif
     HAL_Init();

@@ -1,18 +1,7 @@
 /**
  * @brief           上下移动中断
  *  @details        上下移动的霍尔元件连接在GPIOA组上，当发生GPIOA组的中断时，若中断源来自MoveUP，则表示鼠标向上移动了，否则中断源来自MoveDown并且鼠标向下移动了
- *
- *
- * */
-/*
- * 创建者:             Winyunq
- * 创建日期:            2022-11-29
- *
- *      《初始化》
- * 修订内容:            创建函数
- * @author          Winyunq进行完善
- * @date            2022-11-29
- * @version         1.0.0
+ * 
  */
 #define __WinyunqMouseHallDriver_C
 #ifdef UsingUPDowmHallEdge
@@ -38,16 +27,6 @@ uint32_t MoveLeftRightHappenTime=0,NowLeaveMoveLeftRightTime=0,MoveLeftRightSpee
  * @brief           修改上下移动中断方式                                      
  *  @details        修改上下移动中断方式。调用该函数时，若为上升沿中断，则改为下降沿，若为下降沿中断，则改为上升沿。该函数一般在中断发生时调用，即用于实现上升下降沿双边检测
  * 
- * 
- * *//*
- * 创建者:             Winyunq
- * 创建日期:            2023-05-10
- * 
- *      《初始化》
- * 修订内容:            创建函数
- * @author          Winyunq进行完善
- * @date            2023-05-10
- * @version         1.0.0
  */
 __attribute__((always_inline)) inline void ChangeUPDownInterruptEdge()
 {
@@ -84,16 +63,6 @@ GPIOA_IRQHandler(void)
  * @brief           修改左右移动中断方式                                      
  *  @details        修改左右移动中断方式。调用该函数时，若为上升沿中断，则改为下降沿，若为下降沿中断，则改为上升沿。该函数一般在中断发生时调用，即用于实现上升下降沿双边检测
  * 
- * 
- * *//*
- * 创建者:             Winyunq
- * 创建日期:            2023-05-10
- * 
- *      《初始化》
- * 修订内容:            创建函数
- * @author          Winyunq进行完善
- * @date            2023-05-10
- * @version         1.0.0
  */
 __attribute__((always_inline)) inline void ChangeLeftRightInterruptEdge()
 {
@@ -113,18 +82,7 @@ __attribute__((always_inline)) inline void ChangeLeftRightInterruptEdge()
 /**
  * @brief           左右移动中断
  *  @details        左右移动的霍尔元件连接在GPIOB组上，当发生GPIOB组的中断时，若中断源来自MoveLeft，则表示鼠标向左移动了，否则中断源来自MoveRight并且鼠标向右移动了
- *
- *
- * */
-/*
- * 创建者:             Winyunq
- * 创建日期:            2022-11-29
- *
- *      《初始化》
- * 修订内容:            创建函数
- * @author          Winyunq进行完善
- * @date            2022-11-29
- * @version         1.0.0
+ * 
  */
 __attribute__((interrupt("WCH-Interrupt-fast")))
 __attribute__((section(".highcode"))) void
@@ -147,18 +105,7 @@ GPIOB_IRQHandler(void)
 /**
  * @brief           检测位移，上报位移
  *  @details        检测在此期间各方向霍尔元件触发次数，从而确定在各方向的移动距离。不使用任何算法。
- *
- *
- * */
-/*
- * 创建者:             Winyunq
- * 创建日期:            2022-11-29
- *
- *      《初始化》
- * 修订内容:            创建函数
- * @author          Winyunq进行完善
- * @date            2022-11-29
- * @version         1.0.0
+ * 
  */
 void MoveByLocation()
 {
@@ -263,17 +210,7 @@ void MoveByHallSpeedHalf(){
 /**
  * @brief           霍尔插值移动                                      
  *  @details        移动过程中，将灵敏度的值以平均时间插在多帧移动，效果不好
- * 
- * 
- * *//*
- * 创建者:             Winyunq
- * 创建日期:            2023-05-11
- * 
- *      《初始化》
- * 修订内容:            创建函数
- * @author          Winyunq进行完善
- * @date            2023-05-11
- * @version         1.0.0
+  * 
  */
 void MoveByHallSpeed(){
   /*

@@ -50,21 +50,11 @@ int32 UPTime,
     LeftTime,
     /// 右的霍尔触发次数
     RightTime;
+
 /**
  * @brief           鼠标系统初始化
  *  @details        包括配置文件的读取，鼠标传感器的初始化，LED指示灯初始化
- *
- *
- * */
-/*
- * 创建者:             Winyunq
- * 创建日期:            2022-11-29
- *
- *      《初始化》
- * 修订内容:            创建函数
- * @author          Winyunq进行完善
- * @date            2022-11-29
- * @version         1.0.0
+ * 
  */
 void MouseInit()
 {
@@ -125,18 +115,7 @@ void MouseInit()
 /**
  * @brief           上下移动中断
  *  @details        上下移动的霍尔元件连接在GPIOA组上，当发生GPIOA组的中断时，若中断源来自MoveUP，则表示鼠标向上移动了，否则中断源来自MoveDown并且鼠标向下移动了
- *
- *
- * */
-/*
- * 创建者:             Winyunq
- * 创建日期:            2022-11-29
- *
- *      《初始化》
- * 修订内容:            创建函数
- * @author          Winyunq进行完善
- * @date            2022-11-29
- * @version         1.0.0
+ * 
  */
 __attribute__((interrupt("WCH-Interrupt-fast")))
 __attribute__((section(".highcode"))) void
@@ -153,18 +132,7 @@ GPIOA_IRQHandler(void)
 /**
  * @brief           左右移动中断
  *  @details        左右移动的霍尔元件连接在GPIOB组上，当发生GPIOB组的中断时，若中断源来自MoveLeft，则表示鼠标向左移动了，否则中断源来自MoveRight并且鼠标向右移动了
- *
- *
- * */
-/*
- * 创建者:             Winyunq
- * 创建日期:            2022-11-29
- *
- *      《初始化》
- * 修订内容:            创建函数
- * @author          Winyunq进行完善
- * @date            2022-11-29
- * @version         1.0.0
+ * 
  */
 __attribute__((interrupt("WCH-Interrupt-fast")))
 __attribute__((section(".highcode"))) void
@@ -184,18 +152,7 @@ GPIOB_IRQHandler(void)
 /**
  * @brief           休眠
  *  @details        进入休眠状态，该过程将关闭LED，关闭霍尔电源，只保留轨迹球按键的终端唤醒。当按下轨迹球时，鼠标重启
- *
- *
- * */
-/*
- * 创建者:             Winyunq
- * 创建日期:            2022-11-29
- *
- *      《初始化》
- * 修订内容:            创建函数
- * @author          Winyunq进行完善
- * @date            2022-11-29
- * @version         1.0.0
+ * 
  */
 void GoSleep()
 { 
@@ -232,35 +189,13 @@ void GoSleep()
 /**
  * @brief           获取按键状态
  *  @details        获取按键状态，并将其保存在MouseData中
- *
- *
- * */
-/*
- * 创建者:             Winyunq
- * 创建日期:            2022-11-29
- *
- *      《初始化》
- * 修订内容:            创建函数
- * @author          Winyunq进行完善
- * @date            2022-11-29
- * @version         1.0.0
+ * 
  */
 uint32 UsingSleepTime = 0;
 /**
  * @brief           获取按键状态
  *  @details        获取按键状态，并且保存到MouseData中
- *
- *
- * */
-/*
- * 创建者:             Winyunq
- * 创建日期:            2022-11-29
- *
- *      《初始化》
- * 修订内容:            创建函数
- * @author          Winyunq进行完善
- * @date            2022-11-29
- * @version         1.0.0
+ * 
  */
 void GetTouchSituation()
 {
@@ -279,18 +214,7 @@ void GetTouchSituation()
 /**
  * @brief           检测速度，上报移动量
  *  @details        与MoveByLocation()类似，但是修改移动逻辑为，当移动速度足够快（两次霍尔时间间距足够小）时，放大速度。而当移动速度足够慢时，则以1像素最低精度移动
- *
- *
- * */
-/*
- * 创建者:             Winyunq
- * 创建日期:            2022-11-29
- *
- *      《初始化》
- * 修订内容:            创建函数
- * @author          Winyunq进行完善
- * @date            2022-11-29
- * @version         1.0.0
+ * 
  */
 void MoveBySpeed()
 {
@@ -335,16 +259,7 @@ uint8 MoveDataPoint = 0;
  *  @details        当发生上下移动中断时，调用该函数处理中断信息
  * 
  * @param           参数名称:【Forward】      数据类型:uint8        代表本次移动方向，值为1或-1。使用其它值不合理但不会导致BUG。
- * 
- * *//*
- * 创建者:             Winyunq
- * 创建日期:            2023-02-12
- * 
- *      《初始化》
- * 修订内容:            创建函数
- * @author          Winyunq进行完善
- * @date            2023-02-12
- * @version         1.0.0
+  * 
  */
 __attribute__((always_inline)) inline void MoveBySpeedUPAndDown(uint8 Forward)
 {
@@ -366,16 +281,7 @@ __attribute__((always_inline)) inline void MoveBySpeedLeftAndRight(uint8 Forward
  * @brief           移动距离时域展开移动                                      
  *  @details        将一个移动数据平摊为多个移动数据，随后检测时域上有无过近的上报数据。若存在，则由此叠加数据，增加移动速度。
  * 
- * 
- * *//*
- * 创建者:             Winyunq
- * 创建日期:            2023-02-12
- * 
- *      《初始化》
- * 修订内容:            创建函数
- * @author          Winyunq进行完善
- * @date            2023-02-12
- * @version         1.0.0
+  * 
  */
 void MoveBySpeedDelay()
 {
@@ -421,18 +327,7 @@ void MoveBySpeedDelay()
 /**
  * @brief           检测位移，上报位移
  *  @details        检测在此期间各方向霍尔元件触发次数，从而确定在各方向的移动距离。不使用任何算法。
- *
- *
- * */
-/*
- * 创建者:             Winyunq
- * 创建日期:            2022-11-29
- *
- *      《初始化》
- * 修订内容:            创建函数
- * @author          Winyunq进行完善
- * @date            2022-11-29
- * @version         1.0.0
+ * 
  */
 void MoveByLocation()
 {
@@ -468,18 +363,7 @@ void MoveByLocation()
 /**
  * @brief           鼠标上报事件
  *  @details        鼠标上报事件，立刻获取按键状态，移动数据，并判断是否形成了有效数据包。若数据包无效则无视且休眠计数。若数据包有效则提交数据报且清空休眠时间。
- *
- *
- * */
-/*
- * 创建者:             Winyunq
- * 创建日期:            2022-11-29
- *
- *      《初始化》
- * 修订内容:            创建函数
- * @author          Winyunq进行完善
- * @date            2022-11-29
- * @version         1.0.0
+ * 
  */
 void MouseEvent()
 {
