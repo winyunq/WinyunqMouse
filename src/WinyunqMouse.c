@@ -15,6 +15,8 @@ BYTE4 – 滚轮变化*/
 #include "WinyunqMouse.h"
 #include "WinyunqConfigure.h"
 #include "WinyunqMouseHallDriver.h"
+#include "WinyunqLED.h"
+#include "WinyunqBatteryService.h"
 //#include "USBMouse.h"
     
 /// 该代码理应使用CH573枚举的Edge_ShortDelay，但由于CH579平台下没有该定义，只有short与long，故此重新定义

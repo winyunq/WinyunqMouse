@@ -1,5 +1,5 @@
 *
-!libs
-!src
+!libs/*
+!src/*
 !.Doxyfile
 !makefile

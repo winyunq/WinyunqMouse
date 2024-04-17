@@ -11,5 +11,5 @@ extern void MoveByHallSpeedHalf();
 #define Extern 
 
 #endif
-
+#undef Extern
 #endif

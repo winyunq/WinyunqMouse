@@ -10,7 +10,6 @@
  * Copyright (c) 2023  Winyunq科技公司
  */
 #include "WinyunqMouse.h"
-
 #define DevEP0SIZE 0x40
 /// HID类报表描述符，此处为USB鼠标数据报表
 const UINT8 MouseRepDesc[] = {0x05, 0x01, 0x09, 0x02, 0xA1, 0x01, 0x09, 0x01, 0xA1, 0x00, 0x05, 0x09, 0x19, 0x01, 0x29,
@@ -105,13 +104,13 @@ __attribute__((always_inline)) inline void USB_DevTransProcess( void )
         case UIS_TOKEN_OUT :
         {
           len = R8_USB_RX_LEN;
-          if ( SetupReqCode == 0x09 )
+          /*if ( SetupReqCode == 0x09 )
           {
             if ( pEP0_DataBuf[0] )
-              printf( "Light on Num Lock LED!\n" );
+              //printf( "Light on Num Lock LED!\n" );
             else if ( pEP0_DataBuf[0] == 0 )
-              printf( "Light off Num Lock LED!\n" );
-          }
+              //printf( "Light off Num Lock LED!\n" );
+          }*/
         }
           break;
 

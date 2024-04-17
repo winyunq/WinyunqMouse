@@ -7,7 +7,8 @@ BUILD_DIR = bin
 #	芯片型号
 BoardVersion = CH59x
 # 部分系统参数
-ConfigureFlag = -DDEBUG=0 -DCLK_OSC32K=2 -DDCDC_ENABLE=0 -DHAL_SlEEP=1 -DBLE_TX_POWER=0x25 -D$(BoardVersion)
+ConfigureFlag = -DDEBUG=1
+# -DCLK_OSC32K=2 -DDCDC_ENABLE=0 -DHAL_SlEEP=1 -DBLE_TX_POWER=0x25
 #	C源文件，添加格式:
 #	C_SOURCES += $(wildcard <C文件路径>/*.c )
 C_SOURCES += $(wildcard src/*.c ) 

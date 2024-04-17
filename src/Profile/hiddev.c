@@ -14,12 +14,12 @@
 
 
 #include "CONFIG.h"
-#include "battservice.h"
+#include "WinyunqBatteryService.h"
 #include "scanparamservice.h"
 #include "devinfoservice.h"
 #include "hidmouse.h"
 #include "hiddev.h"
-#include "ConfigureWinyunqMouse.h"
+#include "WinyunqConfigure.h"
 
 /*********************************************************************
  * MACROS

@@ -14,6 +14,7 @@
 #include "HAL.h"
 #include "hiddev.h"
 #include "hidmouse.h"
+#include "WinyunqMouse.h"
 //#include "USBMouse.h"
 /*********************************************************************
  * GLOBAL TYPEDEFS

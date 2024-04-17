@@ -3,7 +3,7 @@
  * Author             : WCH
  * Version            : V1.0
  * Date               : 2018/12/10
- * Description        : Êó±ê·þÎñ
+ * Description        : ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
  * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
  * SPDX-License-Identifier: Apache-2.0
  *******************************************************************************/
@@ -14,7 +14,7 @@
 #include "CONFIG.h"
 #include "hidmouseservice.h"
 #include "hiddev.h"
-#include "battservice.h"
+#include "WinyunqBatteryService.h"
 
 /*********************************************************************
  * MACROS

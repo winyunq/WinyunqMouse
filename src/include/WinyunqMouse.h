@@ -4,6 +4,7 @@
 #include "HAL.h"
 extern void MouseEvent();
 extern void MouseInit();
+extern void GoSleep();
 #ifndef  __WINYUNQMOUSE_C
 /// 若此时不在WinyunqConfigure.c内，则以extern形式访问MouseConfigure
 #define Extern extern
@@ -39,4 +40,5 @@ Extern union
   int32 data; // 32位CPU一次性清空
 } MouseData; //上报数据表,4字节
 
+#undef Extern
 #endif

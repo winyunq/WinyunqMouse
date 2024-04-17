@@ -16,7 +16,7 @@
 extern "C" {
 #endif
 typedef char boolean;
-
+extern bStatus_t AddServiceWinyunqMouseConfigure();
 #define MouseConfigureSize 8
 
 #define InitConfigureData() EEPROM_READ(0, MouseConfigure.data, MouseConfigureSize)
@@ -54,5 +54,5 @@ Extern void ConfigureMouse(char* buffer);
 }
 
 #endif
-
+#undef Extern
 #endif

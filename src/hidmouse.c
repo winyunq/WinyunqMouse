@@ -12,7 +12,7 @@
  */
 
 #include "CONFIG.h"
-#include "battservice.h"
+#include "WinyunqBatteryService.h"
 #include "devinfoservice.h"
 #include "hiddev.h"
 #include "hidmouse.h"
