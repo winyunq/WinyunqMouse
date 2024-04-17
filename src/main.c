@@ -19,9 +19,6 @@
 /*********************************************************************
  * GLOBAL TYPEDEFS
  */
-
-#define BLEInit() BoardVersion##_BLEInit()
-
 __attribute__((aligned(4))) uint32_t MEM_BUF[BLE_MEMHEAP_SIZE / 4];
 
 #if(defined(BLE_MAC)) && (BLE_MAC == TRUE)
