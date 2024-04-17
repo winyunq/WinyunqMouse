@@ -45,7 +45,8 @@ endif
 ifeq ($(BoardVersion),CH59x)
 #	启动文件
 ASM_SOURCES =  \
-libs/$(BoardVersion)/Startup/startup_CH592.s
+libs/$(BoardVersion)/Startup/startup_CH592.s \
+libs/$(BoardVersion)/LIB/ble_task_scheduler.s
 #	链接文件
 LDSCRIPT = libs/$(BoardVersion)/Ld/Link.ld
 #	蓝牙库
