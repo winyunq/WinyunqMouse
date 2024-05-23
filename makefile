@@ -7,8 +7,7 @@ BUILD_DIR = bin
 #	芯片型号
 BoardVersion = CH59x
 # 部分系统参数
-ConfigureFlag = -DDEBUG=1
-# -DCLK_OSC32K=2 -DDCDC_ENABLE=0 -DHAL_SlEEP=1 -DBLE_TX_POWER=0x25
+ConfigureFlag = -DDEBUG=1 -DCLK_OSC32K=2 -DDCDC_ENABLE=0 -DHAL_SlEEP=1 -DBLE_TX_POWER=0x25 -DBLE_BUFF_MAX_LEN=251
 #	C源文件，添加格式:
 #	C_SOURCES += $(wildcard <C文件路径>/*.c )
 C_SOURCES += $(wildcard src/*.c ) 
@@ -55,7 +54,11 @@ LIBDIR = \
 -Llibs/$(BoardVersion)/LIB \
 -Llibs/$(BoardVersion)/StdPeriphDriver
 endif
-
+#	OTA支持
+C_SOURCES += $(wildcard libs/OTA/*.c )
+C_INCLUDES += -Ilibs/OTA/include \
+#	OTA重新链接
+LDSCRIPT = libs/OTA/OTALink/$(BoardVersion)OTA.ld
 #	GCC编译链，可修改 ToolPath 的值指定GCC编译链路径，同时可修改 riscv-none-embed- 前缀，指定不同目标
 PREFIX = $(ToolPath)riscv-none-embed-
 CC = $(PREFIX)gcc

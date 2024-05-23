@@ -70,6 +70,10 @@ int main(void)
 #endif
 /// 支持蓝牙状态下，需要进行的蓝牙初始化
 #ifdef UsingBLE
+
+#ifdef UsingOTA
+    ReadImageFlag();
+#endif
 #if(CHIP_ID ==ID_CH573)
     CH57X_BLEInit();
 #endif
@@ -91,6 +95,9 @@ int main(void)
     USBModeInit();
 #endif
     MouseInit();
+#ifdef UsingOTA
+    OTAPeripheralInit();
+#endif
     Main_Circulation();
 }
 

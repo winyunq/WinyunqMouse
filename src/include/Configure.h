@@ -28,6 +28,7 @@
 //#define UsingUSB 1
 /// 是否开启蓝牙功能。此选型是针对设计有失误，霍尔被蓝牙干扰的情况下迫不得已设计的。
 #define UsingBLE 1
+#define UsingOTA 1
 /// 是否使用检测上升下降沿的霍尔
 #define UsingUPDowmHallEdge 1
 /*CH57X

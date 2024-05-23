@@ -178,7 +178,7 @@ void HidDev_Init( )
   GATTServApp_AddService( GATT_ALL_SERVICES ); // GATT attributes
   DevInfo_AddService( );
   AddServiceWinyunqMouseConfigure();
-  Batt_AddService( );
+  Batt_AddService();
   ScanParam_AddService( );
   // Register for Battery service callback
   Batt_Register( hidDevBattCB );

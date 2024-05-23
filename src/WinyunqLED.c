@@ -26,15 +26,7 @@ uint32 SearchSleepTime=0;
  * 
  * @return          uint16类型            返回值介绍                                                         
  *  @retval         【返回值分段则必选】值或范围      说明
- * *//*
- * 创建者:             Winyunq
- * 创建日期:            2022-12-03
  * 
- *      《初始化》
- * 修订内容:            创建函数
- * @author          Winyunq进行完善
- * @date            2022-12-03
- * @version         1.0.0
  */
 uint16 DefaultLED( uint8 task_id, uint16 events ){
   noConnect&=~LEDLock;
@@ -51,15 +43,7 @@ uint16 DefaultLED( uint8 task_id, uint16 events ){
  * 
  * @return          uint16类型            返回值介绍                                                         
  *  @retval         【返回值分段则必选】值或范围      说明
- * *//*
- * 创建者:             Winyunq
- * 创建日期:            2022-12-03
  * 
- *      《初始化》
- * 修订内容:            创建函数
- * @author          Winyunq进行完善
- * @date            2022-12-03
- * @version         1.0.0
  */
 uint16 WaitConnect( uint8 task_id, uint16 events ){
   if(noConnect){
@@ -77,17 +61,7 @@ uint16 WaitConnect( uint8 task_id, uint16 events ){
  *  @details        将令LED进入闪烁状态，直到noConnect归0
  * 
  * 
- * *//*
- * 创建者:             Winyunq
- * 创建日期:            2022-12-03
- * 
- *      《初始化》
- * 修订内容:            创建函数
- * @author          Winyunq进行完善
- * @date            2022-12-03
- * @version         1.0.0
- */
-void FindConnectPower(){//等待连接
+**/ FindConnectPower(){//等待连接
  noConnect|=LightChange;
   SearchSleepTime=0;
   tmos_start_task( ConnectPower,3,517);
@@ -98,17 +72,7 @@ void FindConnectPower(){//等待连接
  * 
  * @param           参数名称:【time】         数据类型:uint32       锁定LED的时间。在到达该时间后将还原LED为默认LED状态
  * 
- * *//*
- * 创建者:             Winyunq
- * 创建日期:            2022-12-03
- * 
- *      《初始化》
- * 修订内容:            创建函数
- * @author          Winyunq进行完善
- * @date            2022-12-03
- * @version         1.0.0
- */
-void LockLED(uint32 time){
+**/ LockLED(uint32 time){
   noConnect|=LEDLock;
   tmos_start_task( TMOS_ProcessEventRegister( DefaultLED ),3,time);
 }
@@ -117,19 +81,8 @@ extern uint16 PowerTask( uint8 task_id, uint16 events );
  * @brief           LED初始化系统                                     
  *  @details        初始化LED相关进程，并且立刻点亮LED一段时间
  * 
- * 
- * *//*
- * 创建者:             Winyunq
- * 创建日期:            2022-12-03
- * 
- *      《初始化》
- * 修订内容:            创建函数
- * @author          Winyunq进行完善
- * @date            2022-12-03
- * @version         1.0.0
- */
-void InitLED(){
-
+**/
+ InitLED(){
   LockLED(7520);//信号引脚默认为高,之后允许修改
   GPIOA_ModeCfg(LEDIndicator,GPIO_ModeOut_PP_5mA);//初始化信号引脚，低电压点亮
     GPIOA_SetBits(LEDIndicator);
