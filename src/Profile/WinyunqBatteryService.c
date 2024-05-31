@@ -29,13 +29,13 @@
 #define UPR 68
 #define DownR 39
 #define realpower( Data ) (Data*DownR/(UPR+DownR))
-uint16 fullpower = realpower( adcmax ); 
-uint16 nopower = realpower( adcmin ); 
+#define fullpower realpower( adcmax )
+#define nopower realpower( adcmin )
 #define POWERTESTTIME 7*2000
 #define BATT_LEVEL_VALUE_IDX        2 // Position of battery level in attribute array
 #define BATT_LEVEL_VALUE_CCCD_IDX   3 // Position of battery level CCCD in attribute array
-
 #define BATT_LEVEL_VALUE_LEN        1
+#define LaunchADC() R8_ADC_CONVERT |= RB_ADC_START
 /*********************************************************************
  * TYPEDEFS
  */
@@ -92,7 +92,7 @@ static CONST gattAttrType_t battService = { ATT_BT_UUID_SIZE, battServUUID };
 
 // Battery level characteristic
 static uint8 battLevelProps = GATT_PROP_READ | GATT_PROP_NOTIFY;
-static uint8 nowpower = 100;
+static uint8 nowPower = 100;
 static gattCharCfg_t battLevelClientCharCfg[GATT_MAX_NUM_CONN];
 
 // HID Report Reference characteristic descriptor, battery level
@@ -100,6 +100,8 @@ static uint8 hidReportRefBattLevel[HID_REPORT_REF_LEN] =
              { HID_RPT_ID_BATT_LEVEL_IN, HID_REPORT_TYPE_INPUT };
 /// @brief TMOS锂电池电量上报进程
 tmosTaskID PowerID;
+/// @brief 上一次对锂电池进行ADC采样的ADC值
+uint32 LastBatteryADCValue;
 
 /*********************************************************************
  * Profile Attributes - Table
@@ -128,7 +130,7 @@ static gattAttribute_t battAttrTbl[] =
         { ATT_BT_UUID_SIZE, battLevelUUID },
         GATT_PERMIT_READ,
         0,
-        &nowpower
+        &nowPower
       },
 
       // Battery Level Client Characteristic Configuration
@@ -174,7 +176,7 @@ gattServiceCBs_t battCBs =
 
 uint16 PowerTask( uint8 task_id, uint16 events ){
   Batt_MeasLevel();
-  tmos_start_task( PowerID,10000,PowerTask);
+  tmos_start_task( PowerID,Second(60),PowerTask);
   return 0;
 }
 /*********************************************************************
@@ -194,7 +196,7 @@ bStatus_t Batt_AddService( void )
 {
   GPIOA_ModeCfg( power, GPIO_ModeIN_Floating );
   ADC_ExtSingleChSampInit( SampleFreq_3_2, ADC_PGA_0 );
-    ADC_ChannelCfg( PoweGPIOChannel );
+  ADC_ChannelCfg( PoweGPIOChannel );
   uint8 status = SUCCESS;
 
   // Initialize Client Characteristic Configuration attributes
@@ -248,7 +250,7 @@ bStatus_t Batt_SetParameter( uint8 param, uint8 len, void *value )
       battCriticalLevel = *((uint8*)value);
 
       // If below the critical level and critical state not set, notify it
-      if ( nowpower != battCriticalLevel )
+      if ( nowPower != battCriticalLevel )
       {
         battNotifyLevel();
       }
@@ -281,7 +283,7 @@ bStatus_t Batt_GetParameter( uint8 param, void *value )
   switch ( param )
   {
     case BATT_PARAM_LEVEL:
-      *((uint8*)value) = nowpower;
+      *((uint8*)value) = nowPower;
       break;
 
     case BATT_PARAM_CRITICAL_LEVEL:
@@ -312,24 +314,20 @@ bStatus_t Batt_GetParameter( uint8 param, void *value )
   return ( ret );
 }
 
-/*********************************************************************
- * @fn          Batt_MeasLevel
- *
- * @brief       Measure the battery level and update the battery
- *              level value in the service characteristics.  If
- *              the battery level-state characteristic is configured
- *              for notification and the battery level has changed
- *              since the last measurement, then a notification
- *              will be sent.
- *
- * @return      Success
- */
+/**
+ * @brief           锂电池电量测量函数                                      
+ *  @details        锂电池电量测量函数，在测量锂电池电量的同时，产生一次Notify通知设备更新电量。
+ * 
+ * 
+ * @return          bStatus_t类型         返回状态                                                         
+ *  @retval         SUCCESS      目前认为只有测量成功的情况
+ **/
 bStatus_t Batt_MeasLevel( void )
 {
-    nowpower = battMeasure();
-
-    // Send a notification
-    battNotifyLevel();
+  /// 先要求ADC模块工作，采集电压
+  LaunchADC();
+  nowPower = battMeasure();
+  battNotifyLevel();
   return SUCCESS;
 }
 
@@ -391,9 +389,9 @@ static bStatus_t battReadAttrCB( uint16 connHandle, gattAttribute_t *pAttr,
   // Measure battery level if reading level
   if ( uuid == BATT_LEVEL_UUID )
   {
-    nowpower = battMeasure();
     *pLen = 1;
-    pValue[0] = nowpower;
+    /// 在论文中进行了分析，正常情况下ADC变化速度约为，在此期间采集ADC并没有意义。
+    pValue[0] = nowPower;
   }
   else if ( uuid == GATT_REPORT_REF_UUID )
   {
@@ -478,7 +476,7 @@ static void battNotifyCB( linkDBItem_t *pLinkItem )
 		{
 		  noti.handle = battAttrTbl[BATT_LEVEL_VALUE_IDX].handle;
 		  noti.len = BATT_LEVEL_VALUE_LEN;
-		  noti.pValue[0] = nowpower;
+		  noti.pValue[0] = nowPower;
 
 		  if (GATT_Notification(pLinkItem->connectionHandle, &noti, FALSE) != SUCCESS)
 		  {
@@ -499,6 +497,8 @@ static void battNotifyCB( linkDBItem_t *pLinkItem )
  */
 inline uint8 battMeasure( void )
 {
+  /// 对于测量函数，先打开ADC采样，等待数据
+  
   uint32 adcdata;
   uint8 p;
 
@@ -509,7 +509,14 @@ inline uint8 battMeasure( void )
   }
 
   // Configure ADC and perform a read
-  adcdata = (ADC_ExcutSingleConver()+ADC_ExcutSingleConver()+ADC_ExcutSingleConver()+ADC_ExcutSingleConver()+ADC_ExcutSingleConver())/5;
+    while(R8_ADC_CONVERT & RB_ADC_START);
+  adcdata = R16_ADC_DATA & RB_ADC_DATA;
+  /// 最多重复采集五次
+  for (int i = 0; i<5; i++)
+  {
+    //LastBatteryADCValue-adcdata< 
+  }
+  
   if (adcdata >= fullpower)
     {
       p = 100;

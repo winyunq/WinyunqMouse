@@ -77,6 +77,7 @@ LDFLAGS = -march=rv32imac -mabi=ilp32 -mcmodel=medany -msmall-data-limit=8 -mno-
 LDFLAGS += $(LDSCRIPT) -nostartfiles -Xlinker --gc-sections $(LIBDIR) -Xlinker --print-memory-usage -Wl,-Map=$(BUILD_DIR)/$(TARGET).map --specs=nano.specs --specs=nosys.specs -o $(BUILD_DIR)/$(TARGET).elf
 LDFLAGS_Release = -march=rv32imac -mabi=ilp32 -mcmodel=medany -msmall-data-limit=8 -mno-save-restore -Os -fmessage-length=0 -fsigned-char -ffunction-sections -fdata-sections -fno-common  -g -T $(LDSCRIPT) -nostartfiles -Xlinker --gc-sections $(LIBDIR) -Xlinker --print-memory-usage -Wl,-Map=$(BUILD_DIR)/$(TARGET).map --specs=nano.specs --specs=nosys.specs
 #	支持多线程编译，make -j<线程数>
+# //$(patsubst %.c,%.S,$(C_SOURCES))
 all: $(TARGET).elf
 
 OBJECTS = $(addprefix $(BUILD_DIR)/,$(notdir $(C_SOURCES:.c=.o)))
@@ -104,8 +105,14 @@ ifneq ($(wildcard $(BUILD_DIR)),)
 	rm -rf $(BUILD_DIR)
 endif
 	mkdir $(BUILD_DIR)	
-	$(CC) $(C_SOURCES) $(CONFIGURES) $(ASM_SOURCES) $(C_INCLUDES) $(LIBS) $(LDFLAGS_Release) -o $(BUILD_DIR)/$(TARGET).elf
+	$(CC) $(C_SOURCES) $(CONFIGURES) $(ASM_SOURCES) $(C_INCLUDES) $(LIBS) $(LDFLAGS_Release) $(ConfigureFlag) -o $(BUILD_DIR)/$(TARGET).elf
 	$(PREFIX)objcopy -O ihex $(BUILD_DIR)/$(TARGET).elf $(TARGET).hex
+
+asm:
+ifeq ($(wildcard $(BUILD_DIR)),)
+	mkdir $(BUILD_DIR)
+endif
+	cd $(BUILD_DIR) && $(CC) -S $(patsubst %,../%,$(C_SOURCES))  $(patsubst src%,../src%,$(CONFIGURES))  $(patsubst -I%,-I../%,$(C_INCLUDES))    $(LIBS) $(LDFLAGS_Release) $(ConfigureFlag)
 
 clean:
 ifneq ($(wildcard $(BUILD_DIR)),)

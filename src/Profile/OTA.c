@@ -19,7 +19,7 @@
 #include "OTAprofile.h"
 
 /* 记录当前的Image */
-unsigned char CurrImageFlag = 0xff;
+uint8 CurrImageFlag = 0xff;
 /* 用于APP判断文件有效性 */
 const uint32_t Address = 0xFFFFFFFF;
 
@@ -46,27 +46,6 @@ void ReadImageFlag(void)
         CurrImageFlag = IMAGE_A_FLAG;
     }
 }
-/********************************** (C) COPYRIGHT *******************************
- * File Name          : Peripheral.C
- * Author             : WCH
- * Version            : V1.0
- * Date               : 2018/12/10
- * Description        : 外设从机应用程序，初始化广播连接参数，然后广播，直至连接主机后，通过自定义服务传输数据
- *********************************************************************************
- * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
- * Attention: This software (modified or not) and binary are used for 
- * microcontroller manufactured by Nanjing Qinheng Microelectronics.
- *******************************************************************************/
-
-/*********************************************************************
- * INCLUDES
- */
-#include "CONFIG.h"
-#include "devinfoservice.h"
-#include "GATTprofile.h"
-#include "OTA.h"
-#include "OTAprofile.h"
-
 /*********************************************************************
  * MACROS
  */
@@ -159,8 +138,8 @@ uint8_t VerifyStatus = 0;
 /*********************************************************************
  * LOCAL FUNCTIONS
  */
-void        OTA_IAPReadDataComplete(unsigned char index);
-void        OTA_IAPWriteData(unsigned char index, unsigned char *p_data, unsigned char w_len);
+void        OTA_IAPReadDataComplete(uint8 index);
+void        OTA_IAPWriteData(uint8 index, uint8 *p_data, uint8 w_len);
 void        Rec_OTA_IAP_DataDeal(void);
 void        OTA_IAP_SendCMDDealSta(uint8_t deal_status);
 
@@ -622,28 +601,30 @@ void Rec_OTA_IAP_DataDeal(void)
  *
  * @return  none
  */
-void OTA_IAPReadDataComplete(unsigned char index)
+void OTA_IAPReadDataComplete(uint8 index)
 {
     PRINT("OTA Send Comp \r\n");
 }
 
 /**
- * @brief           OTA 通道数据接收完成处理                                      
- *  @details        OTA 通道数据接收完成处理，
+ * @brief           OTA 通道数据接收写入                                      
+ *  @details        OTA 蓝牙GATT通信接收到了数据，将其写入连续地址
  * 
- * @param           参数名称:【index】        数据类型:             参数说明
- * @param           参数名称:【p_data】       数据类型:             参数说明
- * @param           参数名称:【w_len】        数据类型:             参数说明
+ * @param           参数名称:【index】        数据类型:uint8             OTA 通道序号
+ * @param           参数名称:【p_data】       数据类型:uint8             蓝牙接收到的数据地址
+ * @param           参数名称:【w_len】        数据类型:uint8             蓝牙接收到的数据长度
  * 
  **/
-void OTA_IAPWriteData(unsigned char index, unsigned char *p_data, unsigned char w_len)
+void OTA_IAPWriteData(uint8 index, uint8 *p_data, uint8 w_len)
 {
-    unsigned char  rec_len;
-    unsigned char *rec_data;
+    uint8  rec_len;
+    uint8 *rec_data;
 
     rec_len = w_len;
     rec_data = p_data;
-    tmos_memcpy((unsigned char *)&iap_rec_data, rec_data, rec_len);
+    /// 将OTA 蓝牙GATT接收到的数据复制到指定地址保存
+    tmos_memcpy((uint8 *)&iap_rec_data, rec_data, rec_len);
+    /// 根据当前状态决定如何处理这一组数据
     Rec_OTA_IAP_DataDeal();
 }
 

@@ -49,7 +49,7 @@ uint16 WaitConnect( uint8 task_id, uint16 events ){
   if(noConnect){
     if(!(noConnect&LEDLock))GPIOA_InverseBits(LEDIndicator);
     SearchSleepTime++;if(SearchSleepTime*517>WinyunqMouseSleepTime)GoSleep();//搜索时间过长
-  tmos_start_task( ConnectPower,3,517);
+  tmos_start_task( ConnectPower,3,WaitConnectIntervalLED);
   }//LED闪烁
   else {DefaultLED(0,0);
   SearchSleepTime=0;
@@ -83,7 +83,7 @@ extern uint16 PowerTask( uint8 task_id, uint16 events );
  * 
 **/
  InitLED(){
-  LockLED(7520);//信号引脚默认为高,之后允许修改
+  LockLED(Second(5));//信号引脚默认为高,之后允许修改
   GPIOA_ModeCfg(LEDIndicator,GPIO_ModeOut_PP_5mA);//初始化信号引脚，低电压点亮
     GPIOA_SetBits(LEDIndicator);
   ConnectPower=TMOS_ProcessEventRegister( WaitConnect );

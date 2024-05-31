@@ -45,10 +45,18 @@
 */
 /// 鼠标移动所需霍尔元器件的供能GPIOB
 #define trackballpower  GPIO_Pin_4
+/// 时间系设定
+/// 秒设定，单位时间0.625ms，一秒为1600
+#define Second( time ) time*1600
 /// 设备无操作休眠时间设定
 #define WinyunqMouseSleepTime  MouseConfigure.details.sleep*5*2000
 /// 移动模式下，当鼠标速度过快时，会进入高速移动模式，此参数用于设定高速阈值
 #define WinyunqMouseMoveSpeedListTime MouseConfigure.details.speed*5*20
+
+/// 等待连接指示灯闪烁频率
+#define WaitConnectIntervalLED (Second(0.5)/2)
+///
+#define OTAProgramIntervalLED (Second(0.5)/2)
 #define MouseConfigureSize 8
 //支持权限设定
 #define ConfigureSetting ( SupportLeftRightTouch|SupportTrackBall|SupportWorkAsHelp|SupportLED|SUpportMoveTypeBySpeed )

@@ -25,13 +25,12 @@ __attribute__((aligned(4))) uint32_t MEM_BUF[BLE_MEMHEAP_SIZE / 4];
 const uint8_t MacAddr[6] = {0x84, 0xC2, 0xE4, 0x03, 0x02, 0x02};
 #endif
 
-/*********************************************************************
- * @fn      Main_Circulation
- *
- * @brief   ��ѭ��
- *
- * @return  none
- */
+/**
+ * @brief           系统循环                                      
+ *  @details        【不能简单描述则必选】如果不能一句话描述函数，请使用Details进行详细描述
+ * 
+ * 
+ **/
 __attribute__((section(".highcode")))
 void Main_Circulation()
 {

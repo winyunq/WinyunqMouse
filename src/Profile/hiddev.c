@@ -275,20 +275,19 @@ void HidDev_RegisterReports( uint8 numReports, hidRptMap_t *pRpt )
   pHidDevRptTbl = pRpt;
   hidDevRptTblLen = numReports;
 }
-
-/*********************************************************************
- * @fn      HidDev_Report
- *
- * @brief   Send a HID report.
- *
- * @param   id - HID report ID.
- * @param   type - HID report type.
- * @param   len - Length of report.
- * @param   pData - Report data.
- *
- * @return  None.
- */
-uint8 HidDev_Report( uint8 id, uint8 type, uint8 len, uint8*pData )
+/**
+ * @brief           蓝牙HID数据包上报                                      
+ *  @details        蓝牙HID数据包上报，在本项目中，该函数用于蓝牙通道发送数据
+ * 
+ * @param           参数名称:【id】           数据类型:uint8             HID上报ID
+ * @param           参数名称:【type】         数据类型:uint8             HID上报类型
+ * @param           参数名称:【len】          数据类型:uint8             HID数据包上报长度，对于鼠标为4
+ * @param           参数名称:【pData】        数据类型:uint8             HID数据包地址
+ * 
+ * @return          uint8类型             TMOS常规返回                                                         
+ *  @retval         0      无
+ **/
+uint8 BLEHIDReport( uint8 id, uint8 type, uint8 len, uint8*pData )
 {
   // if connected
   if ( hidDevGapState == GAPROLE_CONNECTED )
@@ -898,24 +897,6 @@ static void hidDevBattCB( uint8 event )
 static void hidDevScanParamCB( uint8 event )
 {
 
-}
-
-/*********************************************************************
- * @fn      hidDevBattPeriodicTask
- *
- * @brief   Perform a periodic task for battery measurement.
- *
- * @param   none
- *
- * @return  none
- */
-void hidDevBattPeriodicTask( void )
-{
-  // perform battery level check
-  Batt_MeasLevel( );
-
-  // Restart timer
-  tmos_start_task( hidDevTaskId, BATT_PERIODIC_EVT, DEFAULT_BATT_PERIOD );
 }
 
 /*********************************************************************

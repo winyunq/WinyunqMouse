@@ -335,7 +335,7 @@ static void hidEmuSendMouseReport( uint8 buttons ,uint8 X_data ,uint8 Y_data )
   buf[2] = Y_data;    // Y
   buf[3] = 0;         // Wheel
 
-  HidDev_Report( HID_RPT_ID_MOUSE_IN, HID_REPORT_TYPE_INPUT,
+  BLEHIDReport( HID_RPT_ID_MOUSE_IN, HID_REPORT_TYPE_INPUT,
                  HID_MOUSE_IN_RPT_LEN, buf );
 }
 

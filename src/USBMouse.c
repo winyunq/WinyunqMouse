@@ -386,7 +386,7 @@ __attribute__((always_inline)) inline void USB_DevTransProcess( void )
  * @brief           USB发送数据包                                      
  *  @details        通过有线连接USB方式发送数据包
  * 
- * @param           参数名称:【buffer】       数据类型:             要发送的鼠标数据包
+ * @param           参数名称:【buffer】       数据类型:pointer      要发送的鼠标数据包数据地址
  * @param           参数名称:【size】         数据类型:int          鼠标数据包长度，正常为4
  * 
  * *//*
@@ -399,7 +399,7 @@ __attribute__((always_inline)) inline void USB_DevTransProcess( void )
  * @date            2023-03-01
  * @version         1.0.0
  */
-void DevHIDReport(uint8_t* buffer,int size)
+void USBHIDReport(uint8_t* buffer,int size)
 {
     memcpy(pEP1_IN_DataBuf, buffer, size);
     DevEP1_IN_Deal(size);

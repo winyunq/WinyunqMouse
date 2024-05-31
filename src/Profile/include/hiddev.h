@@ -330,7 +330,7 @@ extern void HidDev_Register(hidDevCfg_t *pCfg, hidDevCB_t *pCBs);
 extern void HidDev_RegisterReports(uint8_t numReports, hidRptMap_t *pRpt);
 
 /*********************************************************************
- * @fn      HidDev_Report
+ * @fn      BLEHIDReport
  *
  * @brief   Send a HID report.
  *
@@ -341,7 +341,7 @@ extern void HidDev_RegisterReports(uint8_t numReports, hidRptMap_t *pRpt);
  *
  * @return  None.
  */
-extern uint8_t HidDev_Report(uint8_t id, uint8_t type, uint8_t len, uint8_t *pData);
+extern uint8_t BLEHIDReport(uint8_t id, uint8_t type, uint8_t len, uint8_t *pData);
 
 /*********************************************************************
  * @fn      HidDev_Close
