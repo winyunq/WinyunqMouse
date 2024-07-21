@@ -21,16 +21,19 @@
 #define MoveUPDown MoveUP|MoveDown
 #define MoveLeftRight MoveLeft|MoveRight
 #define MoveGroup MoveUP|MoveDown|MoveLeft|MoveRight
-#define LEDIndicator GPIO_Pin_9
+#define LEDIndicator GPIO_Pin_12
+#define LEDPWMChannel CH_PWM4
+#define LEDOpenLevel 0
 #define power GPIO_Pin_12
 #define PoweGPIOChannel CH_EXTIN_2
 /// 是否开启USB功能。为了让用户体验产品，而不是去适应产品，默认情况下不应该开启此功能。
 //#define UsingUSB 1
 /// 是否开启蓝牙功能。此选型是针对设计有失误，霍尔被蓝牙干扰的情况下迫不得已设计的。
 #define UsingBLE 1
-#define UsingOTA 1
 /// 是否使用检测上升下降沿的霍尔
 #define UsingUPDowmHallEdge 1
+/// 是否允许设备休眠
+#define UsingSleep 1
 /*CH57X
   CH_EXTIN_0 = 0,     // ADC 外部模拟通道 0    GPIOA4
   CH_EXTIN_1,       // ADC 外部模拟通道 1      GPIOA5
@@ -54,7 +57,7 @@
 #define WinyunqMouseMoveSpeedListTime MouseConfigure.details.speed*5*20
 
 /// 等待连接指示灯闪烁频率
-#define WaitConnectIntervalLED (Second(0.5)/2)
+#define WaitConnectIntervalLED (Second(1)/2)
 ///
 #define OTAProgramIntervalLED (Second(0.5)/2)
 #define MouseConfigureSize 8

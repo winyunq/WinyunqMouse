@@ -407,17 +407,6 @@ void USBHIDReport(uint8_t* buffer,int size)
 /**
  * @brief           USB鼠标模式初始化函数                                      
  *  @details        进行GPIO，USB中断初始化
- * 
- * 
- * *//*
- * 创建者:             Winyunq
- * 创建日期:            2023-03-01
- * 
- *      《初始化》
- * 修订内容:            创建函数
- * @author          Winyunq进行完善
- * @date            2023-03-01
- * @version         1.0.0
  */
 void USBModeInit()
 {

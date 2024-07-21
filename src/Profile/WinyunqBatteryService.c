@@ -27,6 +27,7 @@
 #define adcmax 8387        //即4.3V视为满电
 #define adcmin 5363        //即2.8V视为无电（实际上还能撑着）
 #define UPR 68
+/// 可以考虑下拉电阻使用芯片内部电阻，如此，在待机时可以将其上拉，那么将使得漏电压漏电流降低至LDO损失电压
 #define DownR 39
 #define realpower( Data ) (Data*DownR/(UPR+DownR))
 #define fullpower realpower( adcmax )
@@ -176,7 +177,7 @@ gattServiceCBs_t battCBs =
 
 uint16 PowerTask( uint8 task_id, uint16 events ){
   Batt_MeasLevel();
-  tmos_start_task( PowerID,Second(60),PowerTask);
+  tmos_start_task( PowerID,4,Second(60));
   return 0;
 }
 /*********************************************************************
@@ -208,7 +209,7 @@ bStatus_t Batt_AddService( void )
 										GATT_MAX_ENCRYPT_KEY_SIZE,
                                         &battCBs );
   PowerID=TMOS_ProcessEventRegister( PowerTask );
-  tmos_start_task(PowerID,10000,PowerTask);
+  tmos_start_task(PowerID,4,Second(10));
   return ( status );
 }
 

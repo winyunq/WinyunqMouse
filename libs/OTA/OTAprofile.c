@@ -14,7 +14,6 @@
  * INCLUDES
  */
 #include "CONFIG.h"
-#include "OTAprofile.h"
 #include "CH592SFR.h"
 #include "ota.h"
 

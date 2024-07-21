@@ -40,6 +40,8 @@ Extern union
     boolean help : 1; //辅助按键模式
     boolean LEDOn : 1; // LED常开
     boolean MoveTypeBySpeed : 1 ; //以速度调整移速
+    /// 按压按键LED点亮
+    boolean pressLED:1;
     uint8 speed; // 移动速度
     uint8 report; // 数据回报率
     uint8 sleep; // 休眠时间

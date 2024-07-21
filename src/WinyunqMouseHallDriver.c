@@ -44,8 +44,8 @@ __attribute__((always_inline)) inline void ChangeUPDownInterruptEdge()
     }
 }
 __attribute__((interrupt("WCH-Interrupt-fast")))
-__attribute__((section(".highcode"))) void
-GPIOA_IRQHandler(void)
+__attribute__((section(".highcode"))) 
+void GPIOA_IRQHandler(void)
 {
   /// 判断是同向方向移动产生的中断还是反向移动产生的中断
   if(GPIOA_ReadITFlagBit(MoveUPDownInterruptFrom)){

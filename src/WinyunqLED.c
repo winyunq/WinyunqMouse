@@ -13,6 +13,23 @@
 #include "WinyunqConfigure.h"
 #define LEDLock 0x80
 #define LightChange 0x40
+#if(LEDOpenLevel == 1)
+  #ifdef LEDPWMChannel
+    #define OpenLED() PWMX_ACTOUT(LEDPWMChannel, 64/16, High_Level, ENABLE)
+    #define CloseLED() PWMX_ACTOUT(LEDPWMChannel, 0, High_Level, DISABLE)
+  #elif
+    #define OpenLED() GPIOA_SetBits(LEDIndicator)
+    #define CloseLED() GPIOA_ResetBits(LEDIndicator)
+  #endif
+#else
+  #ifdef LEDPWMChannel
+    #define OpenLED() PWMX_ACTOUT(LEDPWMChannel, 64/16, Low_Level, ENABLE)
+    #define CloseLED() PWMX_ACTOUT(LEDPWMChannel, 0, Low_Level, DISABLE)
+  #elif
+    #define OpenLED() GPIOA_ResetBits(LEDIndicator)
+    #define CloseLED() GPIOA_SetBits(LEDIndicator)
+  #endif
+#endif
 tmosTaskID ConnectPower;
 /// 没有连接设备，等待配对的标志位
 uint8 noConnect=0;
@@ -21,8 +38,8 @@ uint32 SearchSleepTime=0;
  * @brief           LED恢复默认状态                                      
  *  @details        LED恢复到由鼠标配置的亮灭状态
  * 
- * @param           参数名称:【task_id】      数据类型:             参数说明
- * @param           参数名称:【events】       数据类型:             参数说明
+ * @param           参数名称:【task_id】      数据类型:uint8             TMOS的task_id
+ * @param           参数名称:【events】       数据类型:uint16            TMOS的events
  * 
  * @return          uint16类型            返回值介绍                                                         
  *  @retval         【返回值分段则必选】值或范围      说明
@@ -30,16 +47,16 @@ uint32 SearchSleepTime=0;
  */
 uint16 DefaultLED( uint8 task_id, uint16 events ){
   noConnect&=~LEDLock;
-  if(MouseConfigure.details.LEDOn)GPIOA_SetBits(LEDIndicator);//高电压点亮
-  else GPIOA_ResetBits(LEDIndicator);//低电压灭灯
+  if(MouseConfigure.details.LEDOn)OpenLED();//高电压点亮
+  else CloseLED();//低电压灭灯
   return 0;
 }
 /**
  * @brief           LED 等待连接指示                                      
  *  @details        LED将进入指示灯形式，进行里亮-灭-亮的闪烁。该函数不能被主动调用，要调用FindConnectPower函数来启动
  * 
- * @param           参数名称:【task_id】      数据类型:             参数说明
- * @param           参数名称:【events】       数据类型:             参数说明
+ * @param           参数名称:【task_id】      数据类型:uint8             TMOS的task_id
+ * @param           参数名称:【events】       数据类型:uint16            TMOS的events
  * 
  * @return          uint16类型            返回值介绍                                                         
  *  @retval         【返回值分段则必选】值或范围      说明
@@ -61,7 +78,8 @@ uint16 WaitConnect( uint8 task_id, uint16 events ){
  *  @details        将令LED进入闪烁状态，直到noConnect归0
  * 
  * 
-**/ FindConnectPower(){//等待连接
+**/ 
+void FindConnectPower(){//等待连接
  noConnect|=LightChange;
   SearchSleepTime=0;
   tmos_start_task( ConnectPower,3,517);
@@ -72,7 +90,8 @@ uint16 WaitConnect( uint8 task_id, uint16 events ){
  * 
  * @param           参数名称:【time】         数据类型:uint32       锁定LED的时间。在到达该时间后将还原LED为默认LED状态
  * 
-**/ LockLED(uint32 time){
+**/ 
+void LockLED(uint32 time){
   noConnect|=LEDLock;
   tmos_start_task( TMOS_ProcessEventRegister( DefaultLED ),3,time);
 }
@@ -82,9 +101,16 @@ extern uint16 PowerTask( uint8 task_id, uint16 events );
  *  @details        初始化LED相关进程，并且立刻点亮LED一段时间
  * 
 **/
- InitLED(){
-  LockLED(Second(5));//信号引脚默认为高,之后允许修改
+void InitLED(){
   GPIOA_ModeCfg(LEDIndicator,GPIO_ModeOut_PP_5mA);//初始化信号引脚，低电压点亮
-    GPIOA_SetBits(LEDIndicator);
+ #ifdef LEDPWMChannel
+  /// 采用PWM控制灯的亮度，在此不分频
+  PWMX_CLKCfg(1);
+  /// PWM31分频，因为在项目中LED灯多为固定频率
+  PWMX_CycleCfg(PWMX_Cycle_64);
+  
+#endif
+  OpenLED();
+  LockLED(Second(5));//信号引脚默认为高,之后允许修改
   ConnectPower=TMOS_ProcessEventRegister( WaitConnect );
 }

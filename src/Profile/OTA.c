@@ -13,11 +13,11 @@
 /******************************************************************************/
 /* 头文件包含 */
 #include "CONFIG.h"
-#include "HAL.h"
+#include "HAL.h"/*
 #include "GATTprofile.h"
-#include "OTA.h"
-#include "OTAprofile.h"
+#include "OTAprofile.h"*/
 
+#include "OTA.h"
 /* 记录当前的Image */
 uint8 CurrImageFlag = 0xff;
 /* 用于APP判断文件有效性 */
@@ -307,65 +307,6 @@ static void peripheralStateNotificationCB(gapRole_States_t newState, gapRoleEven
             break;
     }
 }
-
-/*********************************************************************
- * @fn      performPeriodicTask
- *
- * @brief   Perform a periodic application task. This function gets
- *          called every five seconds as a result of the SBP_PERIODIC_EVT
- *          TMOS event. In this example, the value of the third
- *          characteristic in the SimpleGATTProfile service is retrieved
- *          from the profile, and then copied into the value of the
- *          the fourth characteristic.
- *
- * @param   none
- *
- * @return  none
- */
-static void performPeriodicTask(void)
-{
-    uint8_t valueToCopy[SIMPLEPROFILE_CHAR4_LEN];
-    uint8_t stat;
-
-    // Call to retrieve the value of the third characteristic in the profile
-    stat = SimpleProfile_GetParameter(SIMPLEPROFILE_CHAR4, valueToCopy);
-    if(stat == SUCCESS)
-    {
-        SimpleProfile_SetParameter(SIMPLEPROFILE_CHAR4, SIMPLEPROFILE_CHAR4_LEN, valueToCopy);
-    }
-}
-
-/*********************************************************************
- * @fn      simpleProfileChangeCB
- *
- * @brief   Callback from Profile indicating a value change
- *
- * @param   paramID - parameter ID of the value that was changed.
- *
- * @return  none
- */
-static void simpleProfileChangeCB(uint8_t paramID)
-{
-    uint8_t newValue;
-
-    switch(paramID)
-    {
-        case SIMPLEPROFILE_CHAR1:
-            PRINT("profile ChangeCB CHAR1..\n");
-            SimpleProfile_GetParameter(SIMPLEPROFILE_CHAR1, &newValue);
-            break;
-
-        case SIMPLEPROFILE_CHAR3:
-            PRINT("profile ChangeCB CHAR3..\n");
-            SimpleProfile_GetParameter(SIMPLEPROFILE_CHAR3, &newValue);
-            break;
-
-        default:
-            // should not reach here!
-            break;
-    }
-}
-
 /*********************************************************************
  * @fn      OTA_IAP_SendData
  *

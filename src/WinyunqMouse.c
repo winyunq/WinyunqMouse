@@ -110,7 +110,7 @@ void MouseInit()
     GPIOA_ResetBits(trackballpower);
   else // 向霍尔供电
     GPIOA_SetBits(trackballpower);
-  /// 鼠标外设初始化完成，初始化LED灯，LED灯将常量三秒
+  /// 鼠标外设初始化完成，初始化LED灯，LED灯将长亮三秒
   InitLED();
 }
 #ifndef UsingUPDowmHallEdge
@@ -150,6 +150,7 @@ GPIOB_IRQHandler(void)
   NowMoveLeftRightTime = TMOS_GetSystemClock();
   GPIOB_ClearITFlagBit(-1); // 后期有可能将轨迹球的GPIO拆为两部分
 }
+
 #endif
 /**
  * @brief           休眠
@@ -158,13 +159,16 @@ GPIOB_IRQHandler(void)
  */
 void GoSleep()
 { 
+  #if(UsingSleep != 1)
+    return;
+  #endif
   /// 在休眠之前先上报一次电量
   battNotifyLevel();
   /// 判断鼠标是否允许休眠，为0表示禁止睡眠
   if (MouseConfigure.details.sleep)
   {
     /// 关掉LED灯
-    GPIOA_ResetBits(LEDIndicator); 
+    CloseLED();
     PFIC_DisableIRQ(GPIO_A_IRQn);
     /// 关掉霍尔供电
     GPIOA_ResetBits(trackballpower);
