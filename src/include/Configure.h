@@ -12,7 +12,7 @@
 //#define WinyunqMouseIDName -28, -70, -111, -26, -116, -121,'1','A'
 //云指     -28, -70, -111, -26, -116, -121
 //指尖鼠标-26,-116,-121,-27,-80,-106,-23,-68,-96,-26,-96,-121
-//GPIO配置
+/// GPIO配置
 #define LeftTouch GPIO_Pin_22
 #define MoveUP GPIO_Pin_13
 #define MoveDown GPIO_Pin_14
@@ -22,8 +22,9 @@
 #define MoveLeftRight MoveLeft|MoveRight
 #define MoveGroup MoveUP|MoveDown|MoveLeft|MoveRight
 #define LEDIndicator GPIO_Pin_12
+/// 采用PWM控制灯的亮度，启用该宏则采用PWM控制灯的开关，屏蔽则禁用之
 #define LEDPWMChannel CH_PWM4
-#define LEDOpenLevel 0
+#define LEDOpenLevel 1
 #define power GPIO_Pin_12
 #define PoweGPIOChannel CH_EXTIN_2
 /// 是否开启USB功能。为了让用户体验产品，而不是去适应产品，默认情况下不应该开启此功能。
@@ -33,7 +34,7 @@
 /// 是否使用检测上升下降沿的霍尔
 #define UsingUPDowmHallEdge 1
 /// 是否允许设备休眠
-#define UsingSleep 1
+//#define UsingSleep 1
 /*CH57X
   CH_EXTIN_0 = 0,     // ADC 外部模拟通道 0    GPIOA4
   CH_EXTIN_1,       // ADC 外部模拟通道 1      GPIOA5

@@ -207,6 +207,8 @@ void GetTouchSituation()
 {
   if (!GPIOB_ReadPortPin(LeftTouch))
   {
+    
+    OpenLED();
     if (MouseConfigure.details.right)
     {
       MouseData.details.situation.right = 1;
@@ -216,6 +218,8 @@ void GetTouchSituation()
       MouseData.details.situation.left = 1;
     }
   }
+  else 
+    CloseLED();
 }
 /**
  * @brief           检测速度，上报移动量

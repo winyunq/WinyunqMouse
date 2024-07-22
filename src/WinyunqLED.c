@@ -9,31 +9,16 @@
  * 
  * Copyright (c) 2022  Winyunq科技公司
  */
+
+#define __WINYUNQLED_C
+#include "WinyunqLED.h"
 #include "WinyunqMouse.h"
 #include "WinyunqConfigure.h"
 #define LEDLock 0x80
 #define LightChange 0x40
-#if(LEDOpenLevel == 1)
-  #ifdef LEDPWMChannel
-    #define OpenLED() PWMX_ACTOUT(LEDPWMChannel, 64/16, High_Level, ENABLE)
-    #define CloseLED() PWMX_ACTOUT(LEDPWMChannel, 0, High_Level, DISABLE)
-  #elif
-    #define OpenLED() GPIOA_SetBits(LEDIndicator)
-    #define CloseLED() GPIOA_ResetBits(LEDIndicator)
-  #endif
-#else
-  #ifdef LEDPWMChannel
-    #define OpenLED() PWMX_ACTOUT(LEDPWMChannel, 64/16, Low_Level, ENABLE)
-    #define CloseLED() PWMX_ACTOUT(LEDPWMChannel, 0, Low_Level, DISABLE)
-  #elif
-    #define OpenLED() GPIOA_ResetBits(LEDIndicator)
-    #define CloseLED() GPIOA_SetBits(LEDIndicator)
-  #endif
-#endif
+#define LEDEvent 0b0000000000000010
+uint8 LEDLevel=25;
 tmosTaskID ConnectPower;
-/// 没有连接设备，等待配对的标志位
-uint8 noConnect=0;
-uint32 SearchSleepTime=0;
 /**
  * @brief           LED恢复默认状态                                      
  *  @details        LED恢复到由鼠标配置的亮灭状态
@@ -66,7 +51,7 @@ uint16 WaitConnect( uint8 task_id, uint16 events ){
   if(noConnect){
     if(!(noConnect&LEDLock))GPIOA_InverseBits(LEDIndicator);
     SearchSleepTime++;if(SearchSleepTime*517>WinyunqMouseSleepTime)GoSleep();//搜索时间过长
-  tmos_start_task( ConnectPower,3,WaitConnectIntervalLED);
+  tmos_start_task( ConnectPower,LEDEvent,WaitConnectIntervalLED);
   }//LED闪烁
   else {DefaultLED(0,0);
   SearchSleepTime=0;
@@ -76,13 +61,11 @@ uint16 WaitConnect( uint8 task_id, uint16 events ){
 /**
  * @brief           LED指示-正在查找设备                                      
  *  @details        将令LED进入闪烁状态，直到noConnect归0
- * 
- * 
 **/ 
 void FindConnectPower(){//等待连接
  noConnect|=LightChange;
   SearchSleepTime=0;
-  tmos_start_task( ConnectPower,3,517);
+  tmos_start_task( ConnectPower,LEDEvent,Second(0.5));
 }
 /**
  * @brief           锁定LED                                      
@@ -93,7 +76,7 @@ void FindConnectPower(){//等待连接
 **/ 
 void LockLED(uint32 time){
   noConnect|=LEDLock;
-  tmos_start_task( TMOS_ProcessEventRegister( DefaultLED ),3,time);
+  tmos_start_task( TMOS_ProcessEventRegister( DefaultLED ),LEDEvent,time);
 }
 extern uint16 PowerTask( uint8 task_id, uint16 events );
 /**
@@ -105,9 +88,9 @@ void InitLED(){
   GPIOA_ModeCfg(LEDIndicator,GPIO_ModeOut_PP_5mA);//初始化信号引脚，低电压点亮
  #ifdef LEDPWMChannel
   /// 采用PWM控制灯的亮度，在此不分频
-  PWMX_CLKCfg(1);
+  PWMX_CLKCfg(8);
   /// PWM31分频，因为在项目中LED灯多为固定频率
-  PWMX_CycleCfg(PWMX_Cycle_64);
+  PWMX_CycleCfg(PWMX_Cycle_256);
   
 #endif
   OpenLED();
