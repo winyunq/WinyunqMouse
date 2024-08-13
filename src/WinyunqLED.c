@@ -49,7 +49,12 @@ uint16 DefaultLED( uint8 task_id, uint16 events ){
  */
 uint16 WaitConnect( uint8 task_id, uint16 events ){
   if(noConnect){
-    if(!(noConnect&LEDLock))GPIOA_InverseBits(LEDIndicator);
+    if(!(noConnect&LEDLock)){
+      #ifdef LEDPWMChannel
+      #else
+        GPIOA_InverseBits(LEDIndicator);
+      #endif
+    }
     SearchSleepTime++;if(SearchSleepTime*517>WinyunqMouseSleepTime)GoSleep();//搜索时间过长
   tmos_start_task( ConnectPower,LEDEvent,WaitConnectIntervalLED);
   }//LED闪烁
@@ -65,7 +70,7 @@ uint16 WaitConnect( uint8 task_id, uint16 events ){
 void FindConnectPower(){//等待连接
  noConnect|=LightChange;
   SearchSleepTime=0;
-  tmos_start_task( ConnectPower,LEDEvent,Second(0.5));
+  tmos_start_task( ConnectPower,LEDEvent,Second(0.25));
 }
 /**
  * @brief           锁定LED                                      
@@ -94,6 +99,6 @@ void InitLED(){
   
 #endif
   OpenLED();
-  LockLED(Second(5));//信号引脚默认为高,之后允许修改
+  LockLED(Second(3));//信号引脚默认为高,之后允许修改
   ConnectPower=TMOS_ProcessEventRegister( WaitConnect );
 }

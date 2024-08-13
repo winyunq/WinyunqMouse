@@ -21,10 +21,11 @@
 #define MoveUPDown MoveUP|MoveDown
 #define MoveLeftRight MoveLeft|MoveRight
 #define MoveGroup MoveUP|MoveDown|MoveLeft|MoveRight
-#define LEDIndicator GPIO_Pin_12
+//#define LEDIndicator GPIO_Pin_9
+#define LEDIndicator GPIO_Pin_13
 /// 采用PWM控制灯的亮度，启用该宏则采用PWM控制灯的开关，屏蔽则禁用之
-#define LEDPWMChannel CH_PWM4
-#define LEDOpenLevel 1
+#define LEDPWMChannel CH_PWM5
+#define LEDOpenLevel 0
 #define power GPIO_Pin_12
 #define PoweGPIOChannel CH_EXTIN_2
 /// 是否开启USB功能。为了让用户体验产品，而不是去适应产品，默认情况下不应该开启此功能。

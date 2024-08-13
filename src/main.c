@@ -83,8 +83,8 @@ int main(void)
     GAPRole_PeripheralInit();
     HidDev_Init();
     HidEmu_Init();
-    PWR_PeriphClkCfg(DISABLE,CloseClock);
-    HSECFG_Current( HSE_RCur_75 );
+    //PWR_PeriphClkCfg(DISABLE,CloseClock);
+    //HSECFG_Current( HSE_RCur_75 );
     #if(defined(DCDC_ENABLE)) && (DCDC_ENABLE == TRUE)
     PWR_DCDCCfg(ENABLE);
     #endif

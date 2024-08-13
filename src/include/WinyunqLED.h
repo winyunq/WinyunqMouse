@@ -2,7 +2,7 @@
 #define WINYUNQLED_H
 #if(LEDOpenLevel == 1)
   #ifdef LEDPWMChannel
-    #define OpenLED() PWMX_ACTOUT(LEDPWMChannel, 256, High_Level, ENABLE)
+    #define OpenLED() PWMX_ACTOUT(LEDPWMChannel, 64, High_Level, ENABLE)
     #define CloseLED() PWMX_ACTOUT(LEDPWMChannel, 0, High_Level, ENABLE)
   #else
     #define OpenLED() GPIOA_SetBits(LEDIndicator)
@@ -10,7 +10,7 @@
   #endif
 #else
   #ifdef LEDPWMChannel
-    #define OpenLED() PWMX_ACTOUT(LEDPWMChannel, 128, Low_Level, ENABLE)
+    #define OpenLED() PWMX_ACTOUT(LEDPWMChannel, 64, Low_Level, ENABLE)
     #define CloseLED() PWMX_ACTOUT(LEDPWMChannel, 0, Low_Level, ENABLE)
   #else
     #define OpenLED() GPIOA_ResetBits(LEDIndicator)
