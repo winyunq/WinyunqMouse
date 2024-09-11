@@ -7,7 +7,7 @@ BUILD_DIR = bin
 #	芯片型号
 BoardVersion = CH59x
 # 部分系统参数
-ConfigureFlag = -DDEBUG=0 -DCLK_OSC32K=2 -DDCDC_ENABLE=0 -DHAL_SlEEP=1 -DBLE_TX_POWER=0x25 -DBLE_BUFF_MAX_LEN=251 
+ConfigureFlag = -DDEBUG=0 -DCLK_OSC32K=2 -DDCDC_ENABLE=1 -DHAL_SLEEP=1 -DBLE_TX_POWER=0x25 -DBLE_BUFF_MAX_LEN=251 
 #UsingOTA = -DUsingOTA=1
 #	C源文件，添加格式:
 #	C_SOURCES += $(wildcard <C文件路径>/*.c )
@@ -40,6 +40,16 @@ LIBDIR = \
 -Llibs/$(BoardVersion)/StdPeriphDriver
 endif
 ifeq ($(BoardVersion),CH58x)
+#	启动文件
+ASM_SOURCES =  \
+libs/$(BoardVersion)/Startup/startup_CH583.s
+#	链接文件
+LDSCRIPT = libs/$(BoardVersion)/Ld/Link.ld
+#	蓝牙库
+LIBS = -lISP583 -lCH58xBLE
+LIBDIR = \
+-Llibs/$(BoardVersion)/LIB \
+-Llibs/$(BoardVersion)/StdPeriphDriver
 endif
 #	CH59x库文件
 ifeq ($(BoardVersion),CH59x)
@@ -115,6 +125,14 @@ ifeq ($(wildcard $(BUILD_DIR)),)
 	mkdir $(BUILD_DIR)
 endif
 	cd $(BUILD_DIR) && $(CC) -O3 -S $(patsubst %,../%,$(C_SOURCES))  $(patsubst src%,../src%,$(CONFIGURES))  $(patsubst -I%,-I../%,$(C_INCLUDES))  $(LIBS) $(LDFLAGS_Release) $(ConfigureFlag)
+#	发布编译，不支持增量编译
+debug:
+ifneq ($(wildcard $(BUILD_DIR)),)
+	rm -rf $(BUILD_DIR)
+endif
+	mkdir $(BUILD_DIR)	
+	$(CC) $(C_SOURCES) $(CONFIGURES) $(ASM_SOURCES) $(C_INCLUDES) $(LIBS) $(LDFLAGS_Release) -O1 -o $(BUILD_DIR)/$(TARGET).elf
+	$(PREFIX)objcopy -O ihex $(BUILD_DIR)/$(TARGET).elf $(TARGET).hex
 #	清除命令，清除生成的中间文件
 clean:
 ifneq ($(wildcard $(BUILD_DIR)),)
