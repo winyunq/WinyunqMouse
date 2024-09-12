@@ -188,13 +188,13 @@ extern "C" {
  * CONSTANTS
  */
 
-// OTA Profileͨ��Index����
+// OTA Profile通道Index定义
 #define OTAPROFILE_CHAR         0
 
-// OTA �����UUID����
+// OTA 服务的UUID定义
 #define OTAPROFILE_SERV_UUID    0xFEE0
 
-// OTA ͨѶͨ��UUID����
+// OTA 通讯通道UUID定义
 #define OTAPROFILE_CHAR_UUID    0xFEE1
 
 // Simple Keys Profile Services bit fields
@@ -212,7 +212,7 @@ extern "C" {
  * Profile Callbacks
  */
 
-// ��д���������ص�
+// 读写操作函数回调
 typedef void (*OTAProfileRead_t)(unsigned char paramID);
 typedef void (*OTAProfileWrite_t)(unsigned char paramID, unsigned char *p_data, unsigned char w_len);
 

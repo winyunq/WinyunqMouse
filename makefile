@@ -8,7 +8,7 @@ BUILD_DIR = bin
 BoardVersion = CH59x
 # 部分系统参数
 ConfigureFlag = -DDEBUG=0 -DCLK_OSC32K=2 -DDCDC_ENABLE=1 -DHAL_SLEEP=1 -DBLE_TX_POWER=0x25 -DBLE_BUFF_MAX_LEN=251 
-#UsingOTA = -DUsingOTA=1
+UsingOTA = -DUsingOTA=1
 #	C源文件，添加格式:
 #	C_SOURCES += $(wildcard <C文件路径>/*.c )
 C_SOURCES += $(wildcard src/*.c ) 
