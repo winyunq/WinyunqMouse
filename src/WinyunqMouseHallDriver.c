@@ -1,4 +1,13 @@
 /**
+ * @file WinyunqMouseHallDriver.c
+ * @brief 原霍尔轨迹球的 GPIO 中断计数、方向跟踪与插值算法。
+ * @details UsingUPDowmHallEdge 控制本文件实现。GPIOA/B_IRQHandler()
+ * 负责霍尔计数与边沿切换；MouseEvent() 中选择的位移算法消费相应数据。
+ * 这些算法不适用于读取光学传感器寄存器，不能原样用于 PAW3805EK。
+ * @note 目前保留原实现和行为；新的光学驱动未完成，未切换 GPIO 功能。
+ * @see @ref WinyunqArchitecture
+ */
+/**
  * @brief           上下移动中断
  *  @details        上下移动的霍尔元件连接在GPIOA组上，当发生GPIOA组的中断时，若中断源来自MoveUP，则表示鼠标向上移动了，否则中断源来自MoveDown并且鼠标向下移动了
  * 

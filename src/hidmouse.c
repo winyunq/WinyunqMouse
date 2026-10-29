@@ -1,3 +1,11 @@
+/**
+ * @file hidmouse.c
+ * @brief BLE HID 应用层与鼠标上报的 TMOS 事件调度。
+ * @details 主机启用 HID 通知后，START_REPORT_EVT 周期性调用 MouseEvent()。
+ * 本层管理广播、连接和调度；位移采集留在鼠标/传感器模块，GATT 服务
+ * 留在 src/Profile，避免更换传感器时改动蓝牙协议架构。
+ * @see @ref WinyunqArchitecture
+ */
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : hidmouse.c
 * Author             : WCH
@@ -175,16 +183,9 @@ static hidDevCB_t hidEmuHidCBs =
 /*********************************************************************
  * @fn      HidEmu_Init
  *
- * @brief   Initialization function for the HidEmuKbd App Task.
- *          This is called during initialization and should contain
- *          any application specific initialization (ie. hardware
- *          initialization/setup, table initialization, power up
- *          notificaiton ... ).
- *
- * @param   task_id - the ID assigned by TMOS.  This ID should be
- *                    used to send messages and set timers.
- *
- * @return  none
+ * @brief 注册鼠标 HID 应用任务，并配置广播、配对参数和 HID 服务。
+ * @details 由 main() 在 BLE/HAL 初始化后调用。任务 ID 来自
+ * TMOS_ProcessEventRegister()，不是调用者传入的参数。
  */
 void HidEmu_Init( )
 {
@@ -240,15 +241,15 @@ void HidEmu_Init( )
 /*********************************************************************
  * @fn      HidEmu_ProcessEvent
  *
- * @brief   HidEmuKbd Application Task event processor.  This function
- *          is called to process all events for the task.  Events
- *          include timers, messages and any other user defined events.
+ * @brief 处理鼠标 HID 应用的 TMOS 消息与定时事件。
+ * @details START_REPORT_EVT 调用 MouseEvent()，然后按原有
+ * MouseConfigure.details.report + 7 个 TMOS tick 重新排队。
+ * WCH 的一个 TMOS tick 为 0.625 ms；这里不是毫秒数。
  *
- * @param   task_id  - The TMOS assigned task ID.
- * @param   events - events to process.  This is a bit map and can
- *                   contain more than one event.
+ * @param task_id TMOS 传入的任务 ID；本实现使用已保存的 hidEmuTaskId。
+ * @param events 待处理事件位图，可能同时包含多个事件。
  *
- * @return  events not processed
+ * @return 尚未处理的事件位；已处理的位从返回值中清除。
  */
 uint16 HidEmu_ProcessEvent( uint8 task_id, uint16 events )
 {

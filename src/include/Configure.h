@@ -1,3 +1,12 @@
+/**
+ * @file Configure.h
+ * @brief 项目级编译配置：设备名称、GPIO、功能开关及公共类型。
+ * @details 由 makefile 的 -include 强制包含到编译单元。
+ * 此处为编译时硬件配置；MouseConfigure 是 EEPROM 中的运行时设置，
+ * 两者用途不同。GPIO 宏本身只表示位掩码，所属 GPIOA/GPIOB 仍由调用处决定。
+ * @warning 当前引脚属于旧霍尔硬件，不是 PAW3805EK 的接线表。
+ * @see @ref WinyunqArchitecture
+ */
 /// 设备名称
 #define WinyunqMouseIDName -28, -70, -111, -27, -72, -99, -28, -71, -117, -26, -116, -121
 /// 设备名称长度

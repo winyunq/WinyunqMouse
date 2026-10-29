@@ -1,0 +1,84 @@
+/**
+ * @mainpage 云指鼠标代码架构
+ * @anchor WinyunqArchitecture
+ *
+ * @section architecture_scope 保持原有分层
+ *
+ * 本页记录现有代码的调用关系，不表示新传感器已经完成调试。
+ * - `src/`：鼠标应用、板级配置和传感器接入。
+ * - `src/include/`：应用接口；`Configure.h` 保存编译期名称、GPIO 和功能开关。
+ * - `src/Profile/`：BLE HID、运行参数、电池和 OTA 服务。
+ * - `libs/`：WCH HAL、外设驱动、BLE 库、启动文件及链接脚本。
+ *   传感器替换不要求重写这些库，也不改变上述目录。
+ *
+ * @section architecture_flow 主循环与上报链路
+ *
+ * main() 设置时钟，按编译开关初始化 BLE/HAL、HID 服务和应用任务，
+ * 再调用 MouseInit()，最后进入 Main_Circulation()。
+ * 启用 `UsingBLE` 时，主循环持续调用 `TMOS_SystemProcess()`；
+ * 否则直接调用 MouseEvent()。
+ *
+ * BLE 路径如下：
+ * @code{.text}
+ * HID 通知启用
+ *   -> hidEmuRptCB(): 安排首次 START_REPORT_EVT
+ *   -> HidEmu_ProcessEvent(): MouseEvent()
+ *   -> 按键状态 + 传感器位移 -> MouseData.buffer[4]
+ *   -> 数据变化时 BLEHIDReport() -> HID 服务
+ *   -> tmos_start_task(): 安排下一次 START_REPORT_EVT
+ * @endcode
+ *
+ * 现有周期为 `MouseConfigure.details.report + 7` 个 TMOS tick；
+ * 仓库 CH59x BLE 头文件将一个 tick 定义为 625 us，不能直接当作毫秒。
+ * 上报仍为四字节：按键、X 位移、Y 位移、滚轮。
+ * MouseEvent() 比较按键变化与 X/Y 位移，维护空闲计数，并在处理后清空本帧数据。
+ *
+ * @section architecture_sensor 现有霍尔传感器边界
+ *
+ * MouseInit() 负责读取配置、初始化按键、霍尔 GPIO/中断和供电，然后初始化 LED。
+ * `WinyunqMouseHallDriver.c` 负责双沿霍尔中断计数和相关位移处理；
+ * `WinyunqMouse.c` 负责把按键、位移、空闲策略与 HID 上报连接起来。
+ * 当前 MouseEvent() 在 `UsingUSB` 分支调用 MoveByHallSpeedHalf()，
+ * 否则调用 MoveBySpeedDelay()；这里描述的是实际代码分支，不是新的传感器实现。
+ *
+ * @subsection architecture_sensor_next PAW3805EK 的最小替换点（待实现）
+ *
+ * 仅在 MouseInit() 的传感器初始化入口、MouseEvent() 的位移获取入口，
+ * 以及 GoSleep() 的传感器停机位置接入 PAW3805EK-CJV1。
+ * 保留按键处理、四字节 HID 报告、BLE 服务及原 TMOS 调度关系。
+ * 上电等待、定期采样等应安排为 TMOS 事件，不能通过长时间忙等阻塞 BLE 调度。
+ *
+ * @warning 精确型号的 SPI 时序、读写命令、状态位和完整初始化序列仍待核实。
+ * 不得把相近 PixArt 型号的寄存器或电源参数直接套入此型号；
+ * 资料确认前，本页不承诺 PAW3805EK 已能工作，也不提供未核实的接线/供电方案。
+ *
+ * @section architecture_config 参数、指示灯、电池与 OTA
+ *
+ * - 编译期配置：`src/include/Configure.h` 中的 GPIO、设备名和功能开关。
+ * - 运行期配置：`MouseConfigure` 保持原八字节布局。MouseInit() 从 EEPROM
+ *   地址 0 读取参数，使用末字节标志检测首次初始化；ConfigureMouse()
+ *   接收配置、应用许可位掩码并写回 EEPROM。
+ * - LED：InitLED() 注册/安排 TMOS 事件；FindConnectPower() 表示等待连接，
+ *   DefaultLED() 恢复用户选择的状态。
+ * - 电池：`WinyunqBatteryService.c` 保留原 ADC 采样、电量换算和 GATT 通知。
+ *   这些旧硬件参数不代表新传感器或新电源板已经验证。
+ * - 休眠：GoSleep() 按 `UsingSleep` 开关处理；现有默认配置未启用该开关。
+ * - OTA：`UsingOTA` 控制初始化入口与链接布局；`src/Profile/OTA.c`
+ *   配合 `libs/OTA/` 处理升级，不属于此次传感器接口的替换范围。
+ *
+ * @section architecture_build 构建与验证边界
+ *
+ * 原构建入口为根目录 `makefile`。先配置 `ToolPath` 为兼容 WCH RISC-V
+ * 工具链的 `bin` 路径，再使用 `make`（或 `make -jN`）；`make release`
+ * 使用发布优化，`make clean` 清理中间目录。默认目标为 `BoardVersion = CH59x`，
+ * 目标固件名为 `Winyunq.hex`；不得据此推断手头开发板的具体封装型号。
+ *
+ * @note 该构建文件原来使用 Windows 路径。移到大小写敏感系统时，必须先核对
+ * `CONFIG.h` 与实际 `config.h`、`.s` 与 `.S`、`Makefile` 与 `makefile`，
+ * 以及 BLE 静态库文件名的大小写。普通主机 GCC 不能代替目标 WCH 工具链。
+ *
+ * 生成文档的命令为 `doxygen .Doxyfile`。现有配置递归读取 `src/`，
+ * 包含 `*.dox`，输出到 `bin/`；不需要把第三方 `libs/` 加入文档输入。
+ * 主机测试、静态检查、目标固件编译和真实硬件验证是不同阶段，
+ * 必须分别记录结果；未连接实际芯片时不能宣称通信、BLE 手感或功耗验证通过。
+ */

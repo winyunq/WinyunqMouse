@@ -1,15 +1,16 @@
-/*BYTE1 –
-|–bit7: 1 表示 Y 坐标的变化量超出－256 ~ 255的范围,0表示没有溢出
-|–bit6: 1 表示 X 坐标的变化量超出－256 ~ 255的范围，0表示没有溢出
-|–bit5: Y 坐标变化的符号位，1表示负数，即鼠标fdown移动?????WTF
-|–bit4: X 坐标变化的符号位，1表示负数，即鼠标fleft移动?????WTF
-|–bit3: 恒为1
-|–bit2: 1表示mid按下
-|–bit1: 1表示右键按下
-|–bit0: 1表示left按下
-BYTE2 – X坐标变化量，与byte的bit4组成9位符号数,负数表示fleft移，正数表右移。用补码表示变化量
-BYTE3 – Y坐标变化量，与byte的bit5组成9位符号数，负数表示fdown移，正数表上移。用补码表示变化量
-BYTE4 – 滚轮变化*/
+/**
+ * @file WinyunqMouse.c
+ * @brief 按键、传感器位移、运行配置与 HID 上报之间的连接层。
+ * @details MouseInit() 加载 EEPROM 配置并初始化现有霍尔硬件；
+ * MouseEvent() 由 HID 的 TMOS 上报事件调用，组装并发送四字节报告。
+ * 更换 PAW3805EK 时应替换传感器初始化和位移采集入口，不改动
+ * BLEHIDReport()、Profile 目录或主循环架构。
+ * @note 实际 BLE 描述符位于 src/Profile/hidmouseservice.c：
+ * 第 0 字节为按键，随后为 X、Y 和滚轮的 8 位相对位移（-127..127）。
+ * MouseData 的旧符号/溢出位不能使 BLE 报告变成 9 位坐标。
+ * @warning 当前仍使用旧霍尔采集路径，尚未接入 PAW3805EK。
+ * @see @ref WinyunqArchitecture
+ */
 #define __WINYUNQMOUSE_C
 
 #include "WinyunqMouse.h"
@@ -55,7 +56,9 @@ int32 UPTime,
 
 /**
  * @brief           鼠标系统初始化
- *  @details        包括配置文件的读取，鼠标传感器的初始化，LED指示灯初始化
+ * @details 从 EEPROM 读取八字节运行配置；末字节标志无效时写入默认值。
+ * 随后初始化按键、霍尔 GPIO 中断和霍尔供电，最后初始化 LED。
+ * @note 这是传感器硬件初始化的替换点，EEPROM 格式和 LED 行为保持独立。
  * 
  */
 void MouseInit()
@@ -154,7 +157,10 @@ GPIOB_IRQHandler(void)
 #endif
 /**
  * @brief           休眠
- *  @details        进入休眠状态，该过程将关闭LED，关闭霍尔电源，只保留轨迹球按键的终端唤醒。当按下轨迹球时，鼠标重启
+ * @details 仅在 UsingSleep == 1 时启用原有关机路径：上报电量，关闭
+ * LED/霍尔供电，等待按键释放，配置 GPIO 唤醒后调用 LowPower_Shutdown()。
+ * @warning 现有按键释放等待含阻塞循环；不得把它当作传感器初始化时序模板。
+ * PAW3805EK 的供电和低功耗序列必须另按确切型号资料确认。
  * 
  */
 void GoSleep()
@@ -371,7 +377,13 @@ void MoveByLocation()
 #endif
 /**
  * @brief           鼠标上报事件
- *  @details        鼠标上报事件，立刻获取按键状态，移动数据，并判断是否形成了有效数据包。若数据包无效则无视且休眠计数。若数据包有效则提交数据报且清空休眠时间。
+ * @details 先读取按键，再调用现有位移算法；BLE 路径当前使用
+ * MoveBySpeedDelay()，USB 路径使用 MoveByHallSpeedHalf()。
+ * 按键变化或 X/Y 非零时上报，随后保存按键状态并清空本次报告。
+ * @note PAW3805EK 的 16 位位移不能直接截断到此处的 8 位报告；
+ * 正式替换时需要保留余量，按描述符范围分批上报。
+ * @warning BLE 模式下本函数运行于 TMOS 回调，传感器初始化等待应拆成事件，
+ * 不能在这里等待硬件就绪或另启永久轮询。
  * 
  */
 void MouseEvent()

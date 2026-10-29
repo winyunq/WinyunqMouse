@@ -1,0 +1,42 @@
+/**
+ * @page PAW3805EKIntegration PAW3805EK-CJV1 接入资料清单
+ *
+ * @section paw_status 当前状态
+ *
+ * 本分支尚未实现或启用 PAW3805EK 驱动，仍运行旧霍尔路径。
+ * 现阶段只整理架构和注释；没有以其他 PixArt 型号的协议补齐空白。
+ *
+ * @section paw_sources 已查到的原厂资料
+ *
+ * - <a href="https://www.codico.com/de/mpattachment/file/download/id/951/">
+ *   PixArt PAW3805EK-CJV1 General Datasheet v1.3（2017-06-27，12 页）</a>：
+ *   第 5 页为引脚，第 6–7 页为电气参数，第 11 页仅有寄存器摘要。
+ * - <a href="https://gzhls.at/blob/ldb/9/6/a/4/82637bf5dcc192637f1cb2322c6b34c36e02.pdf">
+ *   PixArt PAW3805EK-CJV1 Product Brief v1.4（2019-07-03，1 页）</a>。
+ *
+ * 已确认接口为 NCS、SCLK、双向 SDIO 的三线 SPI，X/Y 位移为 16 位。
+ * MOTION 低有效；MFIO 上电默认无功能，不能直接当作复位引脚。
+ *
+ * @section paw_missing 需要向芯片供应商索取的内容
+ *
+ * 请索取确切型号 PAW3805EK-CJV1 的完整 Product Datasheet、
+ * Programming Guide 或经过验证的参考驱动，至少包含：
+ * - SPI 模式、位序、读写命令格式及片选起止条件。
+ * - SDIO 输入/输出换向、读出等待、字节间与事务间的时序。
+ * - Motion_Status 各位含义、位移寄存器的锁存/清除顺序及读取原子性。
+ * - 写保护解锁方式、上电初始化、复位、掉电和唤醒顺序。
+ * - 对应芯片批次的供电、参考电路和配套镜片要求。
+ *
+ * @warning General Datasheet 与较新的 Product Brief 的供电范围表述
+ * 存在差异，必须核实适用版本；旧霍尔的 GPIO 供电方案不可直接照搬。
+ * SPI 最大频率并不能代替完整总线时序，也不能证明任意低速位操作可用。
+ *
+ * @section paw_next 资料齐全后的最小实现边界
+ *
+ * 驱动放在现有 src/ 和 src/include/，不改第三方 libs/ 或 BLE 服务。
+ * 初始化等待通过 TMOS 事件分段；采样接入 MouseEvent() 的既有上报路径。
+ * 16 位位移需按现有 8 位 HID 范围分批输出并保留余量，不可直接截断。
+ * 引脚 GUI 待驱动的实际引脚接口确定后再加入，避免生成无法工作的配置。
+ *
+ * @see @ref WinyunqArchitecture
+ */

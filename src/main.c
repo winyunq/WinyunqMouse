@@ -1,3 +1,11 @@
+/**
+ * @file main.c
+ * @brief 芯片、BLE 与鼠标模块的初始化入口。
+ * @details BLE 模式下依次初始化 WCH 协议栈、HAL、HID 服务和鼠标，
+ * 随后由 Main_Circulation() 持续调度 TMOS。传感器读取应在任务事件中
+ * 完成，不另建阻塞式主循环，也不改变现有 BLE HID 服务。
+ * @see @ref WinyunqArchitecture
+ */
 /********************************** (C) COPYRIGHT *******************************
  * File Name          : main.c
  * Author             : WCH
@@ -26,10 +34,10 @@ const uint8_t MacAddr[6] = {0x84, 0xC2, 0xE4, 0x03, 0x02, 0x02};
 #endif
 
 /**
- * @brief           系统循环                                      
- *  @details        系统循环函数，在该处调用 
- * 
- * 
+ * @brief 持续运行现有系统调度器，不返回。
+ * @details 定义 UsingBLE 时只调度 TMOS；MouseEvent() 由 HID 任务触发。
+ * 未定义 UsingBLE 时沿用原有直接调用 MouseEvent() 的路径。
+ * @warning TMOS 采用协作式任务处理，事件回调中的长时间等待会阻碍 BLE。
  **/
 __attribute__((section(".highcode")))
 void Main_Circulation()
@@ -46,12 +54,11 @@ void Main_Circulation()
 }
 
 /**
- * @brief           系统函数入口                                      
- *  @details        初始化鼠标系统并且启动TMOS管理程序
+ * @brief 初始化系统并进入永久运行的调度循环。
+ * @details 保留原有时钟、BLE、可选 USB、鼠标及可选 OTA 初始化顺序。
  * 
  * 
- * @return          int类型               程序是否正常退出                                                    
- *  @retval         0                    正常退出
+ * @return 正常运行时不返回。
  * 
  */
 int main(void)
