@@ -1,35 +1,53 @@
 /**
  * @file WinyunqMouse.c
  * @brief 按键、传感器位移、运行配置与 HID 上报之间的连接层。
- * @details MouseInit() 加载 EEPROM 配置并初始化现有霍尔硬件；
+ * @details MouseInit() 加载 EEPROM 配置并安排所选传感器初始化；
  * MouseEvent() 由 HID 的 TMOS 上报事件调用，组装并发送四字节报告。
  * 更换 PAW3805EK 时应替换传感器初始化和位移采集入口，不改动
  * BLEHIDReport()、Profile 目录或主循环架构。
  * @note 实际 BLE 描述符位于 src/Profile/hidmouseservice.c：
  * 第 0 字节为按键，随后为 X、Y 和滚轮的 8 位相对位移（-127..127）。
  * MouseData 的旧符号/溢出位不能使 BLE 报告变成 9 位坐标。
- * @warning 当前仍使用旧霍尔采集路径，尚未接入 PAW3805EK。
+ * @note 此分支默认选择 PAW3805EK；引脚未配置时不访问传感器 GPIO。
+ * UsingPAW3805EK = 0 保留原霍尔路径。
  * @see @ref WinyunqArchitecture
  */
 #define __WINYUNQMOUSE_C
 
 #include "WinyunqMouse.h"
 #include "WinyunqConfigure.h"
+#if UsingPAW3805EK
+#include "PAW3805EK.h"
+#include "PAW3805EKConfig.h"
+#else
 #include "WinyunqMouseHallDriver.h"
+#endif
 #include "WinyunqLED.h"
 #include "WinyunqBatteryService.h"
-//#include "USBMouse.h"
+#ifdef UsingUSB
+#include "USBMouse.h"
+#endif
     
 /// 该代码理应使用CH573枚举的Edge_ShortDelay，但由于CH579平台下没有该定义，只有short与long，故此重新定义
 #define Edge_ShortDelay 1
 
 extern uint8 BLEHIDReport(uint8 id, uint8 type, uint8 len, uint8 *pData); // 上报函数
+uint8 Sleep;
+/// 上一次成功上报的按键状态。
+uint8 LastClick;
+#if UsingPAW3805EK
+/// 光学位移余量，避免 16 位传感器数据被 8 位 HID 报告直接截断。
+static signed long OpticalPendingX, OpticalPendingY;
+static signed short OpticalReportX, OpticalReportY;
+/** @brief 最多保留八个 HID 最大帧/轴，避免断链或拥塞后长时间重放。 */
+#define OPTICAL_MAX_PENDING (127L * 8)
+/** @brief 队列饱和的轴次数，可在调试器观察；饱和表示主动丢弃超量位移。 */
+static unsigned long OpticalClippedAxes;
+static unsigned char OpticalDrainEligible, OpticalDiscardNextRead;
+#else
 /// 上次上，下，左，右的霍尔触发时间
 uint32_t LastMoveUPDownTime, NowMoveUPDownTime, LastMoveLeftRightTime, NowMoveLeftRightTime;
 
-uint8 Sleep;
-/// 上一次上报数据包时上报的按键状态
-uint8 LastClick;
 /// 上的霍尔触发次数
 #ifdef UsingUPDowmHallEdge
 /// @brief 触发上下移动中断的GPIO来源
@@ -54,10 +72,12 @@ int32 UPTime,
     /// 右的霍尔触发次数
     RightTime;
 
+#endif
+
 /**
  * @brief           鼠标系统初始化
  * @details 从 EEPROM 读取八字节运行配置；末字节标志无效时写入默认值。
- * 随后初始化按键、霍尔 GPIO 中断和霍尔供电，最后初始化 LED。
+ * 随后初始化原按键、所选传感器和 LED。光学传感器初始化由 TMOS 分段完成。
  * @note 这是传感器硬件初始化的替换点，EEPROM 格式和 LED 行为保持独立。
  * 
  */
@@ -65,7 +85,14 @@ void MouseInit()
 {
   /// 初始化数据
   MouseData.data = 0;
+#if UsingPAW3805EK
+  OpticalPendingX = OpticalPendingY = 0;
+  OpticalReportX = OpticalReportY = 0;
+  OpticalClippedAxes = 0;
+  OpticalDrainEligible = OpticalDiscardNextRead = 0;
+#else
   UPTime = DownTime = LeftTime = RightTime = 0;
+#endif
   /// 加载EEPROM中存储的配置数据
   EEPROM_READ(0, MouseConfigure.data, MouseConfigureSize); // 读取保存的状态位
   /// 检测鼠标是否初始化过，若MouseConfigureSize - 1处数据为17，则已经初始化过，否则需要执行下列代码初始化
@@ -82,8 +109,13 @@ void MouseInit()
     /// 将初始化数据保存至EEPROM
     EEPROM_WRITE(0, MouseConfigure.data, MouseConfigureSize);
   }
-  /// 轨迹球移动中断初始化
-  GPIOB_ModeCfg(LeftTouch, GPIO_ModeIN_PU); // left按下,默认高电平,按钮按下低电平
+  /// 原按键引脚不变，按下为低电平。
+  GPIOB_ModeCfg(LeftTouch, GPIO_ModeIN_PU);
+#if UsingPAW3805EK
+  /// 只安排传感器探测/复位事件，等待时间由 TMOS 处理。
+  PAW3805EK_Init();
+#else
+  /// 原霍尔 GPIO、中断和供电路径。
   GPIOA_ModeCfg(MoveUPDown, GPIO_ModeIN_Floating);
   {
     R16_PA_INT_MODE |= MoveUPDown;
@@ -113,10 +145,11 @@ void MouseInit()
     GPIOA_ResetBits(trackballpower);
   else // 向霍尔供电
     GPIOA_SetBits(trackballpower);
+#endif
   /// 鼠标外设初始化完成，初始化LED灯，LED灯将长亮三秒
   InitLED();
 }
-#ifndef UsingUPDowmHallEdge
+#if !UsingPAW3805EK && !defined(UsingUPDowmHallEdge)
 /**
  * @brief           上下移动中断
  *  @details        上下移动的霍尔元件连接在GPIOA组上，当发生GPIOA组的中断时，若中断源来自MoveUP，则表示鼠标向上移动了，否则中断源来自MoveDown并且鼠标向下移动了
@@ -165,9 +198,7 @@ GPIOB_IRQHandler(void)
  */
 void GoSleep()
 { 
-  #if(UsingSleep != 1)
-    return;
-  #endif
+  #if defined(UsingSleep) && (UsingSleep == 1)
   /// 在休眠之前先上报一次电量
   battNotifyLevel();
   /// 判断鼠标是否允许休眠，为0表示禁止睡眠
@@ -175,9 +206,13 @@ void GoSleep()
   {
     /// 关掉LED灯
     CloseLED();
+#if UsingPAW3805EK
+    /// 使用已证实的芯片掉电命令，不用旧霍尔 GPIO 给裸芯片断电。
+    PAW3805EK_PowerDown();
+#else
     PFIC_DisableIRQ(GPIO_A_IRQn);
-    /// 关掉霍尔供电
     GPIOA_ResetBits(trackballpower);
+#endif
     PWR_PeriphWakeUpCfg(ENABLE, RB_SLP_GPIO_WAKE, Edge_ShortDelay);
     // SetSysClock( CLK_SOURCE_HSE_6_4MHz );
     /// 在进入休眠之前先确保按键处于抬起状态，确保可以正常唤醒
@@ -197,6 +232,7 @@ void GoSleep()
     /// 系统掉电了,转动轨迹球重启唤醒
     LowPower_Shutdown(0); 
   }
+  #endif
 }
 /**
  * @brief           获取按键状态
@@ -226,6 +262,7 @@ void GetTouchSituation()
   }
     //CloseLED();
 }
+#if !UsingPAW3805EK
 /**
  * @brief           检测速度，上报移动量
  *  @details        与MoveByLocation()类似，但是修改移动逻辑为，当移动速度足够快（两次霍尔时间间距足够小）时，放大速度。而当移动速度足够慢时，则以1像素最低精度移动
@@ -375,19 +412,140 @@ void MoveByLocation()
   MouseData.details.z = 0; // 计算需要上报的数据
 }
 #endif
+#endif /* legacy Hall movement algorithms */
+
+#if UsingPAW3805EK
+/**
+ * @brief 将待发位移限制为八帧/轴，避免无线拥塞后的长时间重放。
+ * @param pending 尚未成功上报的位移。
+ * @param delta 本次位移，已提升为 long，反转 -32768 时不会溢出。
+ * @return 饱和后的待发送位移。
+ */
+static signed long OpticalAccumulate(signed long pending, signed long delta)
+{
+  const signed long limit = OPTICAL_MAX_PENDING;
+  if (delta > 0 && pending > limit - delta)
+  {
+    if (OpticalClippedAxes < 0xffffffffUL) ++OpticalClippedAxes;
+    return limit;
+  }
+  if (delta < 0 && pending < -limit - delta)
+  {
+    if (OpticalClippedAxes < 0xffffffffUL) ++OpticalClippedAxes;
+    return -limit;
+  }
+  return pending + delta;
+}
+
+/** @brief 按现有 HID 描述符限制单帧位移，剩余量留给后续上报。 */
+static signed short OpticalReportPart(signed long pending)
+{
+  if (pending > 127) return 127;
+  if (pending < -127) return -127;
+  return (signed short)pending;
+}
+
+/**
+ * @brief 最多读取一组光学位移，并准备当前四字节 HID 报告。
+ * @details SPI 事务有界，不循环等待 MOTION 清除。物理安装方向来自
+ * PAW3805EKConfig.h；原 trackball 选项仍表示逆时针旋转 90 度。
+ * help 模式持续读取并丢弃位移，避免退出该模式时产生积压跳动。
+ * 旧 speed 字段不冒充 CPI；本实现不写未经核实的 CPI 设置。
+ */
+static void MoveByOptical(void)
+{
+  signed short sampleX = 0, sampleY = 0;
+  signed long x, y, temporary;
+  unsigned char valid = PAW3805EK_ReadMotion(&sampleX, &sampleY);
+
+  if (OpticalDiscardNextRead)
+  {
+    /* 连接/通知切换后的第一次读取只清掉设备侧可能积存的旧位移。 */
+    valid = 0;
+    OpticalDiscardNextRead = 0;
+  }
+
+  if (MouseConfigure.details.help)
+  {
+    OpticalPendingX = OpticalPendingY = 0;
+  }
+  else if (valid)
+  {
+    x = sampleX;
+    y = sampleY;
+#if PAW3805EK_SWAP_XY
+    temporary = x; x = y; y = temporary;
+#endif
+#if PAW3805EK_INVERT_X
+    x = -x;
+#endif
+#if PAW3805EK_INVERT_Y
+    y = -y;
+#endif
+    if (MouseConfigure.details.trackball)
+    {
+      temporary = x; x = y; y = -temporary;
+    }
+    OpticalPendingX = OpticalAccumulate(OpticalPendingX, x);
+    OpticalPendingY = OpticalAccumulate(OpticalPendingY, y);
+  }
+  OpticalReportX = OpticalReportPart(OpticalPendingX);
+  OpticalReportY = OpticalReportPart(OpticalPendingY);
+  MouseData.details.x = (uint8)(signed char)OpticalReportX;
+  MouseData.details.y = (uint8)(signed char)OpticalReportY;
+  MouseData.details.z = 0;
+}
+
+/** @brief 仅在传输层接受本帧后扣除位移，发送失败时保留余量。 */
+static void OpticalReportAccepted(void)
+{
+  OpticalPendingX -= OpticalReportX;
+  OpticalPendingY -= OpticalReportY;
+  OpticalDrainEligible = (OpticalPendingX != 0 || OpticalPendingY != 0);
+}
+#endif
+
+/**
+ * @brief 清除连接切换前的光学待发数据，不改变 BLE 服务或 EEPROM。
+ * @details 下次传感器读取只用于丢弃设备侧的旧位移，按键仍正常处理。
+ */
+void MouseResetMotion(void)
+{
+#if UsingPAW3805EK
+  OpticalPendingX = OpticalPendingY = 0;
+  OpticalReportX = OpticalReportY = 0;
+  OpticalDrainEligible = 0;
+  OpticalDiscardNextRead = 1;
+#endif
+  LastClick = 0xff; /* 比较哨兵，不进入报告；重新启用后必须同步一次按键松/按状态。 */
+}
+
+/** @brief 仅当上一帧已被传输层接受且还有余量时请求更快的 TMOS 排空。 */
+unsigned char MouseMotionCanDrain(void)
+{
+#if UsingPAW3805EK
+  return OpticalDrainEligible;
+#else
+  return 0;
+#endif
+}
+
 /**
  * @brief           鼠标上报事件
- * @details 先读取按键，再调用现有位移算法；BLE 路径当前使用
- * MoveBySpeedDelay()，USB 路径使用 MoveByHallSpeedHalf()。
- * 按键变化或 X/Y 非零时上报，随后保存按键状态并清空本次报告。
- * @note PAW3805EK 的 16 位位移不能直接截断到此处的 8 位报告；
- * 正式替换时需要保留余量，按描述符范围分批上报。
+ * @details 先读取按键，再调用所选传感器路径。光学路径读取一组 16 位
+ * 位移，按现有 8 位报告范围分帧；BLE 发送失败时保留位移与按键重试。
+ * 旧霍尔路径的算法和上报逻辑保留，可通过 UsingPAW3805EK 选择。
  * @warning BLE 模式下本函数运行于 TMOS 回调，传感器初始化等待应拆成事件，
  * 不能在这里等待硬件就绪或另启永久轮询。
  * 
  */
 void MouseEvent()
 {
+#if UsingPAW3805EK
+  unsigned char reportAccepted = 1;
+  unsigned char reportStatus;
+  OpticalDrainEligible = 0;
+#endif
   GetTouchSituation();/*
   if (MouseConfigure.details.MoveTypeBySpeed)
   {
@@ -397,7 +555,9 @@ void MouseEvent()
   {
     MoveByLocation();
   }*/
-  #ifdef UsingUSB
+  #if UsingPAW3805EK
+  MoveByOptical();
+  #elif defined(UsingUSB)
    MoveByHallSpeedHalf();
   #else
   MoveBySpeedDelay();
@@ -417,15 +577,37 @@ void MouseEvent()
   }
   else
   {
+#if UsingPAW3805EK
+    reportAccepted = 0;
+#endif
     #ifdef UsingBLE
+    #if UsingPAW3805EK
+    reportStatus = BLEHIDReport(0, 1, 4, MouseData.buffer);
+    reportAccepted = (reportStatus == 0);
+    if (reportStatus == bleNotReady)
+      MouseResetMotion(); /* 断连/未就绪不是短暂队列拥塞，禁止重连后回放。 */
+    #else
     BLEHIDReport(0, 1, 4, MouseData.buffer); // 上报数据
+    #endif
     #endif
     #ifdef UsingUSB
     USBHIDReport(MouseData.buffer,4);
+    #if UsingPAW3805EK
+    reportAccepted = 1; /* 原 USB API 不返回状态，沿用其交付约定。 */
     #endif
+    #endif
+#if UsingPAW3805EK
+    if (reportAccepted)
+      OpticalReportAccepted();
+#endif
     UsingSleepTime = 0;
   }
+#if UsingPAW3805EK
+  if (reportAccepted)
+    LastClick = MouseData.buffer[0];
+#else
   LastClick = MouseData.buffer[0]; // 记录上次上报的按键
+#endif
   MouseData.data = 0;              // 清空,X,Y,Z会在上次上报数据前必定被更新
 
   return;

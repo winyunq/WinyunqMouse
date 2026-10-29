@@ -30,11 +30,11 @@ CONFIGURES = -include src/include/Configure.h
 ifeq ($(BoardVersion),CH57x)
 #	启动文件
 ASM_SOURCES =  \
-libs/$(BoardVersion)/Startup/startup_CH573.s
+libs/$(BoardVersion)/Startup/startup_CH573.S
 #	链接文件
 LDSCRIPT = libs/$(BoardVersion)/Ld/Link.ld
 #	蓝牙库
-LIBS = -lISP573 -lCH57xBLE
+LIBS = -lISP573 -l:LIBCH57xBLE.a
 LIBDIR = \
 -Llibs/$(BoardVersion)/LIB \
 -Llibs/$(BoardVersion)/StdPeriphDriver
@@ -42,11 +42,11 @@ endif
 ifeq ($(BoardVersion),CH58x)
 #	启动文件
 ASM_SOURCES =  \
-libs/$(BoardVersion)/Startup/startup_CH583.s
+libs/$(BoardVersion)/Startup/startup_CH583.S
 #	链接文件
 LDSCRIPT = libs/$(BoardVersion)/Ld/Link.ld
 #	蓝牙库
-LIBS = -lISP583 -lCH58xBLE
+LIBS = -lISP583 -l:LIBCH58xBLE.a
 LIBDIR = \
 -Llibs/$(BoardVersion)/LIB \
 -Llibs/$(BoardVersion)/StdPeriphDriver
@@ -55,12 +55,12 @@ endif
 ifeq ($(BoardVersion),CH59x)
 #	启动文件
 ASM_SOURCES =  \
-libs/$(BoardVersion)/Startup/startup_CH592.s \
-libs/$(BoardVersion)/LIB/ble_task_scheduler.s
+libs/$(BoardVersion)/Startup/startup_CH592.S \
+libs/$(BoardVersion)/LIB/ble_task_scheduler.S
 #	链接文件
 LDSCRIPT = libs/$(BoardVersion)/Ld/Link.ld
 #	蓝牙库
-LIBS = -lISP592 -lCH59xBLE
+LIBS = -lISP592 -l:LIBCH59xBLE.a
 LIBDIR = \
 -Llibs/$(BoardVersion)/LIB \
 -Llibs/$(BoardVersion)/StdPeriphDriver
@@ -72,8 +72,9 @@ C_INCLUDES += -Ilibs/OTA/include \
 #	OTA重新链接
 LDSCRIPT = libs/OTA/OTALink/$(BoardVersion)OTA.ld
 endif
+# Linux 等环境可在命令行覆盖 PREFIX=/path/to/riscv-none-embed-
 #	GCC编译链，可修改 ToolPath 的值指定GCC编译链路径，同时可修改 riscv-none-embed- 前缀，指定不同目标
-PREFIX = $(ToolPath)riscv-none-embed-
+PREFIX ?= $(ToolPath)riscv-none-embed-
 CC = $(PREFIX)gcc
 CPP = $(PREFIX)g++
 CP = $(PREFIX)objcopy
@@ -95,19 +96,19 @@ all: $(TARGET).elf
 OBJECTS = $(addprefix $(BUILD_DIR)/,$(notdir $(C_SOURCES:.c=.o)))
 vpath %.c $(sort $(dir $(C_SOURCES)))
 
-OBJECTS += $(addprefix $(BUILD_DIR)/,$(notdir $(ASM_SOURCES:.s=.o)))
+OBJECTS += $(addprefix $(BUILD_DIR)/,$(notdir $(ASM_SOURCES:.S=.o)))
 vpath %.S $(sort $(dir $(ASM_SOURCES)))
 
 $(BUILD_DIR):
 	mkdir $@
 
-$(BUILD_DIR)/%.o: %.c Makefile | $(BUILD_DIR) 
+$(BUILD_DIR)/%.o: %.c makefile | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CONFIGURES)
 
-$(BUILD_DIR)/%.o: %.S Makefile | $(BUILD_DIR)
+$(BUILD_DIR)/%.o: %.S makefile | $(BUILD_DIR)
 	$(CC) $(ASFLAGS)
 
-$(TARGET).elf: $(OBJECTS) Makefile
+$(TARGET).elf: $(OBJECTS) makefile
 	$(CC) $(LDFLAGS) $(OBJECTS) $(LIBS)
 	$(SZ) $(BUILD_DIR)/$(TARGET).elf
 	$(PREFIX)objcopy -O ihex $(BUILD_DIR)/$(TARGET).elf $(TARGET).hex
@@ -138,3 +139,6 @@ clean:
 ifneq ($(wildcard $(BUILD_DIR)),)
 	rm -rf $(BUILD_DIR)
 endif
+
+# 配置 GUI 会替换头文件；包含编译器依赖，确保下一次 make 真正重新编译。
+-include $(OBJECTS:.o=.d)

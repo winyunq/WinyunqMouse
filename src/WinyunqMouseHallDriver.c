@@ -4,7 +4,7 @@
  * @details UsingUPDowmHallEdge 控制本文件实现。GPIOA/B_IRQHandler()
  * 负责霍尔计数与边沿切换；MouseEvent() 中选择的位移算法消费相应数据。
  * 这些算法不适用于读取光学传感器寄存器，不能原样用于 PAW3805EK。
- * @note 目前保留原实现和行为；新的光学驱动未完成，未切换 GPIO 功能。
+ * @note 保留此实现用于 UsingPAW3805EK = 0 的旧硬件路径；光学路径不启用这些中断。
  * @see @ref WinyunqArchitecture
  */
 /**

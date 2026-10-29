@@ -4,7 +4,7 @@
  *
  * @section architecture_scope 保持原有分层
  *
- * 本页记录现有代码的调用关系，不表示新传感器已经完成调试。
+ * 本页记录原有分层及新增光学路径；目标编译通过不表示真实传感器已调试。
  * - `src/`：鼠标应用、板级配置和传感器接入。
  * - `src/include/`：应用接口；`Configure.h` 保存编译期名称、GPIO 和功能开关。
  * - `src/Profile/`：BLE HID、运行参数、电池和 OTA 服务。
@@ -28,29 +28,29 @@
  *   -> tmos_start_task(): 安排下一次 START_REPORT_EVT
  * @endcode
  *
- * 现有周期为 `MouseConfigure.details.report + 7` 个 TMOS tick；
+ * 空闲/普通周期为 `MouseConfigure.details.report + 7` 个 TMOS tick；
+ * 光学路径成功发送且仍有余量时使用一个 tick 提前排空，失败则保持正常周期。
  * 仓库 CH59x BLE 头文件将一个 tick 定义为 625 us，不能直接当作毫秒。
  * 上报仍为四字节：按键、X 位移、Y 位移、滚轮。
  * MouseEvent() 比较按键变化与 X/Y 位移，维护空闲计数，并在处理后清空本帧数据。
  *
- * @section architecture_sensor 现有霍尔传感器边界
+ * @section architecture_sensor 传感器接入边界
  *
- * MouseInit() 负责读取配置、初始化按键、霍尔 GPIO/中断和供电，然后初始化 LED。
+ * MouseInit() 读取原运行配置、初始化按键和所选传感器，然后初始化 LED。
+ * 此分支默认选择 PAW3805EK；UsingPAW3805EK = 0 保留原霍尔路径。
  * `WinyunqMouseHallDriver.c` 负责双沿霍尔中断计数和相关位移处理；
  * `WinyunqMouse.c` 负责把按键、位移、空闲策略与 HID 上报连接起来。
- * 当前 MouseEvent() 在 `UsingUSB` 分支调用 MoveByHallSpeedHalf()，
- * 否则调用 MoveBySpeedDelay()；这里描述的是实际代码分支，不是新的传感器实现。
+ * 光学路径使用 PAW3805EK_ReadMotion()；旧霍尔路径在 `UsingUSB` 分支
+ * 调用 MoveByHallSpeedHalf()，否则调用 MoveBySpeedDelay()。
  *
- * @subsection architecture_sensor_next PAW3805EK 的最小替换点（待实现）
+ * @subsection architecture_sensor_next PAW3805EK 的最小接入
  *
- * 仅在 MouseInit() 的传感器初始化入口、MouseEvent() 的位移获取入口，
- * 以及 GoSleep() 的传感器停机位置接入 PAW3805EK-CJV1。
- * 保留按键处理、四字节 HID 报告、BLE 服务及原 TMOS 调度关系。
- * 上电等待、定期采样等应安排为 TMOS 事件，不能通过长时间忙等阻塞 BLE 调度。
- *
- * @warning 精确型号的 SPI 时序、读写命令、状态位和完整初始化序列仍待核实。
- * 不得把相近 PixArt 型号的寄存器或电源参数直接套入此型号；
- * 资料确认前，本页不承诺 PAW3805EK 已能工作，也不提供未核实的接线/供电方案。
+ * PAW3805EK.c 在现有 src/ 内提供三线 GPIO SPI 和 TMOS 初始化状态机。
+ * MouseInit() 启动探测，MouseEvent() 读取一组位移并保持原四字节 HID 上报。
+ * 原任务快速排空正常余量，拥塞时限制队列长度；断连/通知关闭清除旧数据。
+ * GoSleep() 的光学分支使用芯片掉电命令，不再操作旧霍尔供电 GPIO。
+ * 电源设计、物理接线和真实总线时序仍需上板核实。
+ * @see @ref PAW3805EKIntegration
  *
  * @section architecture_config 参数、指示灯、电池与 OTA
  *
@@ -63,8 +63,9 @@
  * - 电池：`WinyunqBatteryService.c` 保留原 ADC 采样、电量换算和 GATT 通知。
  *   这些旧硬件参数不代表新传感器或新电源板已经验证。
  * - 休眠：GoSleep() 按 `UsingSleep` 开关处理；现有默认配置未启用该开关。
- * - OTA：`UsingOTA` 控制初始化入口与链接布局；`src/Profile/OTA.c`
- *   配合 `libs/OTA/` 处理升级，不属于此次传感器接口的替换范围。
+ * - OTA：保留原构建选择；makefile 的 UsingOTA 变量默认选择 OTA 链接脚本，
+ *   不等同于 C 源码中的预处理宏。默认入口 0x1000，烧录需匹配既有引导布局。
+ *   src/Profile/OTA.c 与 libs/OTA/ 不作功能重构。
  *
  * @section architecture_build 构建与验证边界
  *
@@ -73,9 +74,10 @@
  * 使用发布优化，`make clean` 清理中间目录。默认目标为 `BoardVersion = CH59x`，
  * 目标固件名为 `Winyunq.hex`；不得据此推断手头开发板的具体封装型号。
  *
- * @note 该构建文件原来使用 Windows 路径。移到大小写敏感系统时，必须先核对
- * `CONFIG.h` 与实际 `config.h`、`.s` 与 `.S`、`Makefile` 与 `makefile`，
- * 以及 BLE 静态库文件名的大小写。普通主机 GCC 不能代替目标 WCH 工具链。
+ * @note makefile 保留原 Windows 默认工具路径，同时允许命令行覆盖 PREFIX。
+ * 已修正 CH59x/OTA 头文件、汇编和静态库的大小写，并读取 .d 头文件依赖，
+ * 使 GUI 替换配置后能够重新编译。WCH 库内容和 CPU 目标不作无关改动。
+ * 普通主机 GCC 不能代替目标 WCH 工具链。
  *
  * 生成文档的命令为 `doxygen .Doxyfile`。现有配置递归读取 `src/`，
  * 包含 `*.dox`，输出到 `bin/`；不需要把第三方 `libs/` 加入文档输入。

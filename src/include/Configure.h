@@ -4,7 +4,8 @@
  * @details 由 makefile 的 -include 强制包含到编译单元。
  * 此处为编译时硬件配置；MouseConfigure 是 EEPROM 中的运行时设置，
  * 两者用途不同。GPIO 宏本身只表示位掩码，所属 GPIOA/GPIOB 仍由调用处决定。
- * @warning 当前引脚属于旧霍尔硬件，不是 PAW3805EK 的接线表。
+ * @note 原按键/LED/电池引脚保持不变；PAW3805EK 的三线引脚单独放在
+ * PAW3805EKConfig.h，需先由配置工具明确选择。
  * @see @ref WinyunqArchitecture
  */
 /// 设备名称
@@ -41,8 +42,17 @@
 //#define UsingUSB 1
 /// 是否开启蓝牙功能。此选型是针对设计有失误，霍尔被蓝牙干扰的情况下迫不得已设计的。
 #define UsingBLE 1
-/// 是否使用检测上升下降沿的霍尔
+/** @brief 此分支默认使用 PAW3805EK；设为 0 可保留原霍尔路径。 */
+#ifndef UsingPAW3805EK
+#define UsingPAW3805EK 1
+#endif
+#if UsingPAW3805EK && !defined(UsingBLE)
+#error "PAW3805EK uses the existing BLE/TMOS scheduler; enable UsingBLE or select the legacy Hall path"
+#endif
+/// 霍尔双沿中断只在旧传感器路径启用，避免抢占光学传感器 GPIO。
+#if !UsingPAW3805EK
 #define UsingUPDowmHallEdge 1
+#endif
 /// 是否允许设备休眠
 //#define UsingSleep 1
 /*CH57X

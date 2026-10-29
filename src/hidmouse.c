@@ -87,6 +87,10 @@
 
 // Task ID
 static uint8 hidEmuTaskId=INVALID_TASK_ID;
+#if UsingPAW3805EK
+/** @brief 主机通知关闭或断链后不再产生光学报告定时事件。 */
+static uint8 hidMouseReportsEnabled;
+#endif
 
 /*********************************************************************
  * EXTERNAL VARIABLES
@@ -243,7 +247,8 @@ void HidEmu_Init( )
  *
  * @brief 处理鼠标 HID 应用的 TMOS 消息与定时事件。
  * @details START_REPORT_EVT 调用 MouseEvent()，然后按原有
- * MouseConfigure.details.report + 7 个 TMOS tick 重新排队。
+ * MouseConfigure.details.report + 7 个 TMOS tick 重新排队；光学路径成功
+ * 上报且仍有余量时改用 1 tick 排空，临时失败保持原周期退避。
  * WCH 的一个 TMOS tick 为 0.625 ms；这里不是毫秒数。
  *
  * @param task_id TMOS 传入的任务 ID；本实现使用已保存的 hidEmuTaskId。
@@ -290,8 +295,18 @@ uint16 HidEmu_ProcessEvent( uint8 task_id, uint16 events )
 
   if ( events & START_REPORT_EVT )
   {
+#if UsingPAW3805EK
+    if (!hidMouseReportsEnabled)
+      return (events ^ START_REPORT_EVT);
+#endif
     MouseEvent();
+#if UsingPAW3805EK
+    /* 只在成功发送后加快余量排空；无线队列忙时仍按原周期退避。 */
+    tmos_start_task(hidEmuTaskId, START_REPORT_EVT,
+                    MouseMotionCanDrain() ? 1 : MouseConfigure.details.report + 7);
+#else
     tmos_start_task( hidEmuTaskId, START_REPORT_EVT, MouseConfigure.details.report+7 );
+#endif
     //hidDevBattPeriodicTask();
     return ( events ^ START_REPORT_EVT );
   }
@@ -377,6 +392,12 @@ static void hidEmuStateCB( gapRole_States_t newState , gapRoleEvent_t * pEvent )
         
         // get connection handle
         hidEmuConnHandle = event->connectionHandle;    
+#if UsingPAW3805EK
+        /* 已绑定主机可能静默恢复 CCC，不一定再次触发 ENABLE 回调。 */
+        MouseResetMotion();
+        hidMouseReportsEnabled = TRUE;
+        tmos_start_task(hidEmuTaskId, START_REPORT_EVT, 500);
+#endif
         tmos_start_task( hidEmuTaskId, START_PARAM_UPDATE_EVT, START_PARAM_UPDATE_EVT_DELAY );
         PowerTask(0,0);
         PRINT( "Connected..\n" );
@@ -389,6 +410,11 @@ static void hidEmuStateCB( gapRole_States_t newState , gapRoleEvent_t * pEvent )
       break;      
     
     case GAPROLE_WAITING:
+#if UsingPAW3805EK
+      hidMouseReportsEnabled = FALSE;
+      tmos_stop_task(hidEmuTaskId, START_REPORT_EVT);
+      MouseResetMotion();
+#endif
       if( pEvent->gap.opcode == GAP_END_DISCOVERABLE_DONE_EVENT )
       {
         PRINT( "Waiting for advertising..\n" );
@@ -450,8 +476,20 @@ static uint8 hidEmuRptCB( uint8 id, uint8 type, uint16 uuid,
   // notifications enabled
   else if ( oper == HID_DEV_OPER_ENABLE )
   {
+#if UsingPAW3805EK
+    MouseResetMotion();
+    hidMouseReportsEnabled = TRUE;
+#endif
 		tmos_start_task( hidEmuTaskId, START_REPORT_EVT, 500 );
   }
+#if UsingPAW3805EK
+  else if (oper == HID_DEV_OPER_DISABLE)
+  {
+    hidMouseReportsEnabled = FALSE;
+    tmos_stop_task(hidEmuTaskId, START_REPORT_EVT);
+    MouseResetMotion();
+  }
+#endif
   return status;
 }
 

@@ -15,7 +15,7 @@
  */
 #include "CONFIG.h"
 #include "CH592SFR.h"
-#include "ota.h"
+#include "OTA.h"
 
 /*********************************************************************
  * MACROS

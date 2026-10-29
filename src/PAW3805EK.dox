@@ -1,42 +1,65 @@
 /**
- * @page PAW3805EKIntegration PAW3805EK-CJV1 接入资料清单
+ * @page PAW3805EKIntegration PAW3805EK-CJV1 裸芯片驱动
  *
- * @section paw_status 当前状态
+ * @section paw_status 当前实现
  *
- * 本分支尚未实现或启用 PAW3805EK 驱动，仍运行旧霍尔路径。
- * 现阶段只整理架构和注释；没有以其他 PixArt 型号的协议补齐空白。
+ * PAW3805EK.c 直接操作裸芯片的 NCS、SCLK、双向 SDIO，不依赖传感器模块。
+ * 保留原 src/、libs/、BLE HID 和 TMOS 架构。未确认引脚时
+ * PAW3805EK_CONFIGURED 默认为 0，驱动不触碰 GPIO。
  *
- * @section paw_sources 已查到的原厂资料
+ * 初始化状态机：检查双产品 ID -> 软复位 -> TMOS 等待 8 ticks -> 再验 ID。
+ * 8 ticks 名义为 5 ms，扣除一个 tick 相位仍超过参考实现的 4 ms。
+ * 错误 ID 最多探测三次，不向未识别设备写复位命令。PAW3805EK_GetState()
+ * 可查询 UNCONFIGURED、STARTING、READY、NOT_FOUND、POWERED_DOWN、ERROR。
  *
- * - <a href="https://www.codico.com/de/mpattachment/file/download/id/951/">
- *   PixArt PAW3805EK-CJV1 General Datasheet v1.3（2017-06-27，12 页）</a>：
- *   第 5 页为引脚，第 6–7 页为电气参数，第 11 页仅有寄存器摘要。
- * - <a href="https://gzhls.at/blob/ldb/9/6/a/4/82637bf5dcc192637f1cb2322c6b34c36e02.pdf">
- *   PixArt PAW3805EK-CJV1 Product Brief v1.4（2019-07-03，1 页）</a>。
+ * 每次 PAW3805EK_ReadMotion() 最多读取一组 16 位原始位移，无无限循环。
+ * 普通寄存器模式读取 Motion、X/Y 低字节、X/Y 高字节；不用 Quick Burst。
+ * PAW3805EK_PowerDown() 只发送已确认的芯片掉电命令，不操作电源 GPIO。
  *
- * 已确认接口为 NCS、SCLK、双向 SDIO 的三线 SPI，X/Y 位移为 16 位。
- * MOTION 低有效；MFIO 上电默认无功能，不能直接当作复位引脚。
+ * @section paw_evidence 协议依据与实现边界
  *
- * @section paw_missing 需要向芯片供应商索取的内容
+ * <a href="https://github.com/Infineon/Code-Examples-BT-SDK-for-ModusToolbox/blob/fb65fbe6fbc0f0daa9b18837354407148d554acc/CYW920820EVB-02/apps/demo/hid/ble_mouse/motion/PAW3805_opticalsensor.c">
+ * Infineon 官方参考文件</a>明确标注 PAW3805EK-CJV1，提供 Mode 3、MSB-first、
+ * 读写格式、双 ID、Motion 有效位、XY 读取顺序及复位/掉电操作的依据。
+ * 本驱动依据这些协议事实独立编写，不包含或移植其受限许可实现。
  *
- * 请索取确切型号 PAW3805EK-CJV1 的完整 Product Datasheet、
- * Programming Guide 或经过验证的参考驱动，至少包含：
- * - SPI 模式、位序、读写命令格式及片选起止条件。
- * - SDIO 输入/输出换向、读出等待、字节间与事务间的时序。
- * - Motion_Status 各位含义、位移寄存器的锁存/清除顺序及读取原子性。
- * - 写保护解锁方式、上电初始化、复位、掉电和唤醒顺序。
- * - 对应芯片批次的供电、参考电路和配套镜片要求。
+ * <a href="https://www.codico.com/de/mpattachment/file/download/id/951/">
+ * PixArt General Datasheet v1.3</a>提供引脚、电气、机械和寄存器摘要。
+ * 它未完整列出 SPI 最小时序。PAW3805EK_HALF_CLOCK_US 与
+ * PAW3805EK_READ_TURNAROUND_US 默认各 1 us，可通过构建宏覆盖为 1..10 us。
+ * 这是有界的保守工程选择，不是已验证的原厂时序下限或兼容性保证。
+ * 尚需真实芯片及逻辑分析仪验证 SDIO 换向、波形和实际运动。
  *
- * @warning General Datasheet 与较新的 Product Brief 的供电范围表述
- * 存在差异，必须核实适用版本；旧霍尔的 GPIO 供电方案不可直接照搬。
- * SPI 最大频率并不能代替完整总线时序，也不能证明任意低速位操作可用。
+ * @section paw_board 接线与配置
  *
- * @section paw_next 资料齐全后的最小实现边界
+ * 离线打开 config/index.html，明确选择三根 GPIO，生成
+ * src/include/PAW3805EKConfig.h 后重新编译。工具禁止重复及当前已占用的
+ * PA9、PA12、PA13、PB22；GPIO 编号不是封装脚号，必须核对实物开发板。
+ * 本驱动轮询状态寄存器，无须连接 MOTION 或把 MFIO 当复位脚。
+ * 不配置未经核实的 CPI/LED/低功耗参数，不更改原 MCU 频率或 BLE 发射功率。
  *
- * 驱动放在现有 src/ 和 src/include/，不改第三方 libs/ 或 BLE 服务。
- * 初始化等待通过 TMOS 事件分段；采样接入 MouseEvent() 的既有上报路径。
- * 16 位位移需按现有 8 位 HID 范围分批输出并保留余量，不可直接截断。
- * 引脚 GUI 待驱动的实际引脚接口确定后再加入，避免生成无法工作的配置。
+ * @warning 裸芯片供电、去耦、镜片、焊接与电平匹配需按对应批次资料确认。
+ * 不能直接用原霍尔 GPIO 给传感器供电。旧 General Datasheet 与较新
+ * <a href="https://gzhls.at/blob/ldb/9/6/a/4/82637bf5dcc192637f1cb2322c6b34c36e02.pdf">
+ * Product Brief v1.4</a>的电压范围有差异；代码不能替代电源设计。
+ *
+ * @section paw_hid 现有 HID 报告与拥塞策略
+ *
+ * 应用层按原四字节报告发送 -127..127 的坐标，并保留正常的分帧余量。
+ * 成功发送后若仍有余量，原 START_REPORT_EVT 在一个 TMOS tick 后再运行；
+ * 临时发送失败则按原报告周期退避，不忙重试。
+ * 每轴最多保留 1016 counts，超量饱和丢弃并累计 OpticalClippedAxes，
+ * 避免大样本或无线拥塞后鼠标长时间自行移动。此策略不改变驱动返回的 16 位数据。
+ * 断连、关闭通知或 bleNotReady 清空余量；连接恢复后丢弃首个旧读取，
+ * 同时强制同步当前按键状态。绑定恢复 CCC 时也能重新启动原上报任务。
+ *
+ * @section paw_validation 验证
+ *
+ * tests/PAW3805EK 验证 GPIO 事务模型、识别/复位状态机、位移符号和配置门禁；
+ * tests/optical_integration 验证真实 MouseEvent 源码的八种方向组合、
+ * 拥塞上界、失败重试、断链余量清理与按键重同步；tests/config_gui.cjs
+ * 验证配置工具生成逻辑。主机测试不代替 BLE 重连、真实传感器或电气验证。
+ * WCH GCC 8.2 已完成 CH592 目标编译/链接；无实物烧录和手感/功耗结论。
  *
  * @see @ref WinyunqArchitecture
  */

@@ -11,9 +11,29 @@
 [项目源码](src/)
 
 保留原有 `src/`、`libs/` 和 TMOS/BLE HID 架构。
-[架构说明](src/Architecture.dox) · [PAW3805EK 接入资料清单](src/PAW3805EK.dox)
+[架构说明](src/Architecture.dox) · [PAW3805EK 驱动说明](src/PAW3805EK.dox)
 
-目前已整理核心注释；PAW3805EK 驱动尚未完成，仍保留旧霍尔采集路径。
+已加入 **PAW3805EK-CJV1 裸芯片驱动**：三线 GPIO SPI、产品 ID 检查、TMOS 非阻塞复位等待、16 位 XY 读取和掉电命令。位移接入原 BLE HID 上报，保留原按键、运行配置和霍尔代码（`UsingPAW3805EK=0` 可选回旧路径）。核心接口与流程使用 Doxygen 注释。
+
+### 配置与编译
+
+1. 在本机浏览器打开 [config/index.html](config/index.html)，选择实际连接的 NCS、SCLK、SDIO GPIO 和方向，下载配置头文件。
+2. 用它替换 `src/include/PAW3805EKConfig.h`。默认文件 **未配置引脚、不访问传感器 GPIO**，不能直接烧录后期待鼠标移动。
+3. 使用兼容的 WCH RISC-V GCC 工具链构建，例如：
+
+   ```sh
+   make PREFIX=/path/to/riscv-none-embed- -j2
+   ```
+
+保留原默认 CH59x/CH592 目标、60 MHz 时钟和链接布局。**原 makefile 默认选择 OTA 链接脚本，入口位于 `0x1000`**；烧录前必须确认板卡、引导程序和固件布局，不把编译成功当作可直接刷入任意开发板。引脚编号不是封装脚号；裸芯片还需要正确供电、去耦和配套镜片，不能使用原霍尔供电 GPIO 代替电源设计。
+
+### 验证状态
+
+- 已通过 GPIO 事务/状态机测试、八种坐标方向与 HID 分帧/重试测试、配置页面生成逻辑测试；[运行测试](tests/README.md)。
+- 已用 WCH GCC 8.2 完成 CH592 目标编译、链接及 HEX 生成，包含未配置和示例引脚配置两种构建。示例引脚仅用于编译测试。
+- **尚未连接真实芯片**：SPI 最小时序不完整，当前可调延时是工程选择，仍需逻辑分析仪及真机确认通信、BLE 重连、手感和功耗。未实现 CPI 调节，也未完成整机电源设计。
+
+寄存器协议依据明确标注该完整型号的 [Infineon 官方参考资料](https://github.com/Infineon/Code-Examples-BT-SDK-for-ModusToolbox/blob/fb65fbe6fbc0f0daa9b18837354407148d554acc/CYW920820EVB-02/apps/demo/hid/ble_mouse/motion/PAW3805_opticalsensor.c)，本驱动独立编写，不复制其受限许可代码。
 
 ## 硬件
 

@@ -15,17 +15,21 @@ extern void MouseEvent();
 extern void MouseInit();
 /** @brief 按 UsingSleep 编译开关执行原有低功耗关机流程。 */
 extern void GoSleep();
+/** @brief 连接/通知切换时清空光学余量，防止旧位移在重连后回放。 */
+extern void MouseResetMotion(void);
+/** @brief 上一帧发送成功且仍有余量时，允许 TMOS 提前再次上报。 */
+extern unsigned char MouseMotionCanDrain(void);
 #ifndef  __WINYUNQMOUSE_C
 /// 若此时不在WinyunqConfigure.c内，则以extern形式访问MouseConfigure
-#define Extern extern
+#define WINYUNQ_MOUSE_EXTERN extern
 
 #else
 
-#define Extern 
+#define WINYUNQ_MOUSE_EXTERN
 
 #endif
 
-Extern union
+WINYUNQ_MOUSE_EXTERN union
 {
   struct
   {
@@ -50,5 +54,5 @@ Extern union
   int32 data; // 32位CPU一次性清空
 } MouseData; //上报数据表,4字节
 
-#undef Extern
+#undef WINYUNQ_MOUSE_EXTERN
 #endif

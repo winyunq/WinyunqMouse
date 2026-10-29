@@ -1,0 +1,9 @@
+#ifndef PAW3805EK_SWAP_XY
+#define PAW3805EK_SWAP_XY 0
+#endif
+#ifndef PAW3805EK_INVERT_X
+#define PAW3805EK_INVERT_X 0
+#endif
+#ifndef PAW3805EK_INVERT_Y
+#define PAW3805EK_INVERT_Y 0
+#endif
